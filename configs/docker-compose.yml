@@ -1,0 +1,36 @@
+services:
+  coral:
+    command: /init.d/.mkrt
+    environment:
+      HTTPS_PROXY: ${coral_httpsProxy:-}
+      LICENSE: ${license}
+      LOG_LEVEL: ${coral_logLevel:-info}
+    image: ${coral_image:-inaccel/coral}:${coral_tag:-2.0}
+    ports:
+    - ${coral_port:-0}:55677
+    privileged: true
+    restart: always
+    volumes:
+    - /etc/localtime:/etc/localtime:ro
+    - init:/init.d:ro
+    - ${root_state:-/var/lib/inaccel}:/var/lib/inaccel:rslave
+    - ${root_data:-/var/opt/inaccel}:/var/opt/inaccel
+  mkrt:
+    command: touch /init.d/.mkrt
+    environment:
+      MKRT_CONFIG_PATH: ${root_config:-/etc/inaccel}/runtimes
+      MKRT_SYSROOT_DIR: /host
+    image: ${mkrt_image:-inaccel/mkrt}:${mkrt_tag:-latest}
+    restart: on-failure
+    volumes:
+    - /:/host:ro
+    - init:/init.d
+    - ${root_data:-/var/opt/inaccel}/runtimes:/var/opt/inaccel/runtimes
+  monitor:
+    image: ${monitor_image:-inaccel/monitor}:${monitor_tag:-latest}
+    ports:
+    - ${monitor_port:-0}:19999
+    restart: always
+version: '3.2'
+volumes:
+  init:
