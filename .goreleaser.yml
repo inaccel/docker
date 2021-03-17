@@ -1,0 +1,36 @@
+project_name: inaccel-docker
+
+before:
+  hooks:
+  - go mod download
+builds:
+- binary: docker-inaccel
+  goarch:
+  - amd64
+  goos:
+  - linux
+  main: cmd/main.go
+
+archives:
+- files:
+  - none*
+  name_template: "{{ .Os }}-{{ .Arch }}"
+checksum:
+  name_template: checksums.txt
+nfpms:
+- bindir: /usr/libexec/docker/cli-plugins
+  description: Simplifying FPGA management in Docker
+  formats:
+  - deb
+  - rpm
+  homepage: https://inaccel.com
+  license: Apache-2.0
+  maintainer: InAccel <info@inaccel.com>
+  overrides:
+    deb:
+      file_name_template: "{{ .ProjectName }}_{{ .RawVersion }}_{{ .Arch }}"
+    rpm:
+      file_name_template: "{{ .ProjectName }}-{{ .RawVersion }}-1.{{ .Arch }}"
+      replacements:
+        amd64: x86_64
+  vendor: InAccel
