@@ -3,7 +3,7 @@ services:
     command: /init.d/.mkrt
     environment:
       HTTPS_PROXY: ${coral_httpsProxy:-}
-      LICENSE: ${license}
+      LICENSE: ${license:?The license variable is not set.}
       LOG_LEVEL: ${coral_logLevel:-info}
     image: ${coral_image:-inaccel/coral}:${coral_tag:-2.0}
     labels:
