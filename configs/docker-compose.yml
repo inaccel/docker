@@ -6,6 +6,10 @@ services:
       LICENSE: ${license}
       LOG_LEVEL: ${coral_logLevel:-info}
     image: ${coral_image:-inaccel/coral}:${coral_tag:-2.0}
+    labels:
+      com.inaccel.docker.default-exec-command: console
+      com.inaccel.docker.default-exec-service: True
+      com.inaccel.docker.default-logs-service: True
     ports:
     - ${coral_port:-0}:55677
     privileged: true
