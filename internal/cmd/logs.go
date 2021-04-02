@@ -83,6 +83,6 @@ func init() {
 	Logs.Flags().StringP("service", "s", "", "Service name")
 	logs.BindPFlag("service", Logs.Flags().Lookup("service"))
 
-	Logs.Flags().StringP("tail", "n", "all", "Number of lines to show from the end of the logs")
+	Logs.Flags().StringP("tail", "n", "10", "Number of lines to show from the end of the logs")
 	logs.BindPFlag("tail", Logs.Flags().Lookup("tail"))
 }
