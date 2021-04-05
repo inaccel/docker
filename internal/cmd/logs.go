@@ -21,12 +21,13 @@ var (
 		PreRunE: func(_ *cobra.Command, args []string) error {
 			var cmd *system.Cmd
 
-			if len(viper.GetString("service")) == 0 {
+			if len(logs.GetString("service")) == 0 {
 				cmd = system.Command("docker")
 				cmd.Flag("host", internal.Host)
 				cmd.Flag("log-level", viper.GetString("log-level"))
 				cmd.Arg("ps")
 				cmd.Flag("all", true)
+				cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.container-number=%d", logs.GetInt("index")))
 				cmd.Flag("filter", "label=com.docker.compose.oneoff=False")
 				cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", logs.GetString("project-name")))
 				cmd.Flag("filter", "label=com.inaccel.docker.default-logs-service=True")
