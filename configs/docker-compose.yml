@@ -2,39 +2,39 @@ services:
   coral:
     command: /init.d/.mkrt
     environment:
-      FPGAS: ${coral_fpgas:-all}
-      HTTPS_PROXY: ${coral_httpsProxy:-}
+      FPGAS: ${coral_fpgas}
+      HTTPS_PROXY: ${coral_httpsProxy}
       LICENSE: ${license:?The license variable is not set.}
-      LOG_LEVEL: ${coral_logLevel:-info}
-    image: ${coral_image:-inaccel/coral}:${coral_tag:-2.0}
+      LOG_LEVEL: ${coral_logLevel}
+    image: ${coral_image}:${coral_tag}
     labels:
       com.inaccel.docker.default-exec-command: console
       com.inaccel.docker.default-exec-service: True
       com.inaccel.docker.default-logs-service: True
     ports:
-    - ${coral_port:-0}:55677
+    - ${coral_port}:55677
     privileged: true
     restart: always
     volumes:
     - /etc/localtime:/etc/localtime:ro
     - init:/init.d:ro
-    - ${root_state:-/var/lib/inaccel}:/var/lib/inaccel:rslave
-    - ${root_data:-/var/opt/inaccel}:/var/opt/inaccel
+    - ${root_state}:/var/lib/inaccel:rslave
+    - ${root_data}:/var/opt/inaccel
   mkrt:
     command: touch /init.d/.mkrt
     environment:
-      MKRT_CONFIG_PATH: ${root_config:-/etc/inaccel}/runtimes
+      MKRT_CONFIG_PATH: ${root_config}/runtimes
       MKRT_SYSROOT_DIR: /host
-    image: ${mkrt_image:-inaccel/mkrt}:${mkrt_tag:-latest}
+    image: ${mkrt_image}:${mkrt_tag}
     restart: on-failure
     volumes:
     - /:/host:ro
     - init:/init.d
-    - ${root_data:-/var/opt/inaccel}/runtimes:/var/opt/inaccel/runtimes
+    - ${root_data}/runtimes:/var/opt/inaccel/runtimes
   monitor:
-    image: ${monitor_image:-inaccel/monitor}:${monitor_tag:-latest}
+    image: ${monitor_image}:${monitor_tag}
     ports:
-    - ${monitor_port:-0}:19999
+    - ${monitor_port}:19999
     restart: always
 version: '3.2'
 volumes:
