@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/inaccel/docker/internal"
+	"github.com/inaccel/docker/pkg/grep"
 	"github.com/inaccel/docker/pkg/system"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -15,9 +16,9 @@ var (
 	logs = viper.New()
 
 	Logs = &cobra.Command{
-		Use:   "logs [OPTIONS]",
+		Use:   "logs [OPTIONS] [PATTERN]",
 		Short: "View output from containers",
-		Args:  cobra.NoArgs,
+		Args:  cobra.MaximumNArgs(1),
 		PreRunE: func(_ *cobra.Command, args []string) error {
 			var cmd *system.Cmd
 
@@ -60,7 +61,20 @@ var (
 			cmd.Flag("follow", logs.GetBool("follow"))
 			cmd.Flag("tail", logs.GetString("tail"))
 			cmd.Arg(fmt.Sprintf("%s_%s_%d", logs.GetString("project-name"), logs.GetString("service"), logs.GetInt("index")))
-			cmd.Std(os.Stdin, os.Stdout, os.Stderr)
+			switch len(args) {
+			case 0:
+				cmd.Std(nil, os.Stdout, os.Stderr)
+			case 1:
+				pattern, err := grep.Compile(args[0])
+				if err != nil {
+					return err
+				}
+
+				stdout := pattern.WriteCloser(os.Stdout, !logs.GetBool("no-color"))
+				defer stdout.Close()
+
+				cmd.Std(nil, stdout, os.Stderr)
+			}
 
 			if err := cmd.Run(viper.GetBool("debug")); err != nil {
 				return err
@@ -77,6 +91,9 @@ func init() {
 
 	Logs.Flags().Int("index", 1, "Index of the container if there are multiple instances of a service")
 	logs.BindPFlag("index", Logs.Flags().Lookup("index"))
+
+	Logs.Flags().Bool("no-color", false, "Produce monochrome output")
+	logs.BindPFlag("no-color", Logs.Flags().Lookup("no-color"))
 
 	Logs.Flags().StringP("project-name", "p", "inaccel", "Specify an alternate project name")
 	logs.BindPFlag("project-name", Logs.Flags().Lookup("project-name"))
