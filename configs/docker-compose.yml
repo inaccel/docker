@@ -2,6 +2,7 @@ services:
   coral:
     command: /init.d/.mkrt
     environment:
+      FPGAS: ${coral_fpgas:-all}
       HTTPS_PROXY: ${coral_httpsProxy:-}
       LICENSE: ${license:?The license variable is not set.}
       LOG_LEVEL: ${coral_logLevel:-info}
