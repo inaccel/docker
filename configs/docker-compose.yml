@@ -14,7 +14,7 @@ services:
       com.inaccel.docker.default-exec-service: True
       com.inaccel.docker.default-logs-service: True
     ports:
-    - ${coral_port}:55677
+    - ${coral_port:-0}:55677
     privileged: true
     restart: always
     volumes:
@@ -33,5 +33,5 @@ services:
   monitor:
     image: ${monitor_image}:${monitor_tag}
     ports:
-    - ${monitor_port}:19999
+    - ${monitor_port:-0}:19999
     restart: always
