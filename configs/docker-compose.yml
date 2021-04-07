@@ -1,6 +1,8 @@
 services:
   coral:
-    command: /init.d/.mkrt
+    depends_on:
+      mkrt:
+        condition: service_completed_successfully
     environment:
       FPGAS: ${coral_fpgas}
       HTTPS_PROXY: ${coral_httpsProxy}
@@ -17,11 +19,9 @@ services:
     restart: always
     volumes:
     - /etc/localtime:/etc/localtime:ro
-    - init:/init.d:ro
     - ${root_state}:/var/lib/inaccel:rslave
     - ${root_data}:/var/opt/inaccel
   mkrt:
-    command: touch /init.d/.mkrt
     environment:
       MKRT_CONFIG_PATH: ${root_config}/runtimes
       MKRT_SYSROOT_DIR: /host
@@ -29,13 +29,9 @@ services:
     restart: on-failure
     volumes:
     - /:/host:ro
-    - init:/init.d
     - ${root_data}/runtimes:/var/opt/inaccel/runtimes
   monitor:
     image: ${monitor_image}:${monitor_tag}
     ports:
     - ${monitor_port}:19999
     restart: always
-version: '3.2'
-volumes:
-  init:
