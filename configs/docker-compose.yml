@@ -19,11 +19,11 @@ services:
     restart: always
     volumes:
     - /etc/localtime:/etc/localtime:ro
-    - ${root_state}:/var/lib/inaccel:rslave
+    - ${XDG_STATE_HOME:-/var/lib}/inaccel:/var/lib/inaccel:rslave
     - runtimes:/var/opt/inaccel/runtimes:ro
   mkrt:
     environment:
-      MKRT_CONFIG_PATH: ${root_config}/runtimes
+      MKRT_CONFIG_PATH: ${XDG_CONFIG_HOME:-/etc}/inaccel/runtimes
       MKRT_SYSROOT_DIR: /host
     image: ${mkrt_image}:${mkrt_tag}
     restart: on-failure
