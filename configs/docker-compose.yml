@@ -20,7 +20,7 @@ services:
     volumes:
     - /etc/localtime:/etc/localtime:ro
     - ${root_state}:/var/lib/inaccel:rslave
-    - ${root_data}:/var/opt/inaccel
+    - runtimes:/var/opt/inaccel/runtimes:ro
   mkrt:
     environment:
       MKRT_CONFIG_PATH: ${root_config}/runtimes
@@ -29,9 +29,11 @@ services:
     restart: on-failure
     volumes:
     - /:/host:ro
-    - ${root_data}/runtimes:/var/opt/inaccel/runtimes
+    - runtimes:/var/opt/inaccel/runtimes
   monitor:
     image: ${monitor_image}:${monitor_tag}
     ports:
     - ${monitor_port:-0}:19999
     restart: always
+volumes:
+  runtimes:
