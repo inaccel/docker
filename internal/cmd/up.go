@@ -56,6 +56,7 @@ var (
 				cmd.Arg(fmt.Sprintf("%s:%s", "inaccel/fpga-operator", up.GetString("tag")))
 			}
 			cmd.Arg("docker-compose")
+			cmd.Flag("profile", up.GetStringSlice("profile"))
 			cmd.Flag("project-name", up.GetString("project-name"))
 			cmd.Arg("up")
 			cmd.Flag("detach", true)
@@ -77,6 +78,9 @@ func init() {
 	Up.Flags().String("env-file", "", "Specify an alternate environment file")
 	Up.MarkFlagFilename("env-file")
 	up.BindPFlag("env-file", Up.Flags().Lookup("env-file"))
+
+	Up.Flags().StringSlice("profile", []string{}, "Specify a profile to enable")
+	up.BindPFlag("profile", Up.Flags().Lookup("profile"))
 
 	Up.Flags().StringP("project-name", "p", "inaccel", "Specify an alternate project name")
 	up.BindPFlag("project-name", Up.Flags().Lookup("project-name"))
