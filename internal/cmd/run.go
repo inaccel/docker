@@ -13,13 +13,13 @@ import (
 )
 
 var (
-	up = viper.New()
+	run = viper.New()
 
-	Up = &cobra.Command{
-		Use:   "up [OPTIONS]",
-		Short: "Create and start containers",
-		Args:  cobra.NoArgs,
-		RunE: func(_ *cobra.Command, _ []string) error {
+	Run = &cobra.Command{
+		Use:   "run [OPTIONS] SERVICE [COMMAND] [ARGS...]",
+		Short: "Run a one-off command",
+		Args:  cobra.MinimumNArgs(1),
+		RunE: func(_ *cobra.Command, args []string) error {
 			rootless, err := internal.Rootless()
 			if err != nil {
 				return err
@@ -27,15 +27,15 @@ var (
 
 			var cmd *system.Cmd
 
-			if up.GetBool("pull") {
+			if run.GetBool("pull") {
 				cmd = system.Command("docker")
 				cmd.Flag("host", internal.Host)
 				cmd.Flag("log-level", viper.GetString("log-level"))
 				cmd.Arg("pull")
-				if strings.Contains(up.GetString("tag"), ":") {
-					cmd.Arg(up.GetString("tag"))
+				if strings.Contains(run.GetString("tag"), ":") {
+					cmd.Arg(run.GetString("tag"))
 				} else {
-					cmd.Arg(fmt.Sprintf("%s:%s", "inaccel/fpga-operator", up.GetString("tag")))
+					cmd.Arg(fmt.Sprintf("%s:%s", "inaccel/fpga-operator", run.GetString("tag")))
 				}
 				cmd.Std(nil, os.Stdout, os.Stderr)
 
@@ -58,26 +58,27 @@ var (
 				cmd.Flag("env", fmt.Sprintf("%s=%s", "XDG_RUNTIME_DIR", xdg.RuntimeDir))
 				cmd.Flag("env", fmt.Sprintf("%s=%s", "XDG_STATE_HOME", xdg.StateHome))
 			}
-			cmd.Flag("env", up.GetStringSlice("env"))
-			if len(up.GetString("env-file")) > 0 {
-				cmd.Flag("env-file", up.GetString("env-file"))
+			cmd.Flag("env", run.GetStringSlice("env"))
+			if len(run.GetString("env-file")) > 0 {
+				cmd.Flag("env-file", run.GetString("env-file"))
 			} else if _, err := os.Stat(".env"); err == nil {
 				cmd.Flag("env-file", ".env")
 			}
 			cmd.Flag("interactive", true)
 			cmd.Flag("rm", true)
+			cmd.Flag("tty", true)
 			cmd.Flag("volume", fmt.Sprintf("%s:%s", internal.Host.Path, "/var/run/docker.sock"))
-			if strings.Contains(up.GetString("tag"), ":") {
-				cmd.Arg(up.GetString("tag"))
+			if strings.Contains(run.GetString("tag"), ":") {
+				cmd.Arg(run.GetString("tag"))
 			} else {
-				cmd.Arg(fmt.Sprintf("%s:%s", "inaccel/fpga-operator", up.GetString("tag")))
+				cmd.Arg(fmt.Sprintf("%s:%s", "inaccel/fpga-operator", run.GetString("tag")))
 			}
 			cmd.Arg("docker-compose")
-			cmd.Flag("profile", up.GetStringSlice("profile"))
-			cmd.Flag("project-name", up.GetString("project-name"))
-			cmd.Arg("up")
-			cmd.Flag("detach", true)
-			cmd.Std(nil, os.Stdout, os.Stderr)
+			cmd.Flag("project-name", run.GetString("project-name"))
+			cmd.Arg("run")
+			cmd.Flag("rm", true)
+			cmd.Arg(args...)
+			cmd.Std(os.Stdin, os.Stdout, os.Stderr)
 
 			if err := cmd.Run(viper.GetBool("debug")); err != nil {
 				return err
@@ -89,22 +90,19 @@ var (
 )
 
 func init() {
-	Up.Flags().StringSliceP("env", "e", []string{}, "Set environment variables")
-	up.BindPFlag("env", Up.Flags().Lookup("env"))
+	Run.Flags().StringSliceP("env", "e", []string{}, "Set environment variables")
+	run.BindPFlag("env", Run.Flags().Lookup("env"))
 
-	Up.Flags().String("env-file", "", "Specify an alternate environment file")
-	Up.MarkFlagFilename("env-file")
-	up.BindPFlag("env-file", Up.Flags().Lookup("env-file"))
+	Run.Flags().String("env-file", "", "Specify an alternate environment file")
+	Run.MarkFlagFilename("env-file")
+	run.BindPFlag("env-file", Run.Flags().Lookup("env-file"))
 
-	Up.Flags().StringSlice("profile", []string{}, "Specify a profile to enable")
-	up.BindPFlag("profile", Up.Flags().Lookup("profile"))
+	Run.Flags().StringP("project-name", "p", "inaccel", "Specify an alternate project name")
+	run.BindPFlag("project-name", Run.Flags().Lookup("project-name"))
 
-	Up.Flags().StringP("project-name", "p", "inaccel", "Specify an alternate project name")
-	up.BindPFlag("project-name", Up.Flags().Lookup("project-name"))
+	Run.Flags().Bool("pull", false, "Always attempt to pull a newer version of the image")
+	run.BindPFlag("pull", Run.Flags().Lookup("pull"))
 
-	Up.Flags().Bool("pull", false, "Always attempt to pull a newer version of the image")
-	up.BindPFlag("pull", Up.Flags().Lookup("pull"))
-
-	Up.Flags().StringP("tag", "t", "latest", "Tag and optionally a name in the 'name:tag' format")
-	up.BindPFlag("tag", Up.Flags().Lookup("tag"))
+	Run.Flags().StringP("tag", "t", "latest", "Tag and optionally a name in the 'name:tag' format")
+	run.BindPFlag("tag", Run.Flags().Lookup("tag"))
 }

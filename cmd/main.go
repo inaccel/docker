@@ -41,7 +41,7 @@ func main() {
 			},
 		}
 
-		inaccel.AddCommand(cmd.Down, cmd.Exec, cmd.Logs, cmd.Ps, cmd.Up)
+		inaccel.AddCommand(cmd.Down, cmd.Exec, cmd.Logs, cmd.Ps, cmd.Run, cmd.Up)
 
 		return inaccel
 	}, manager.Metadata{
