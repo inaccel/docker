@@ -7,6 +7,7 @@ import (
 
 	"github.com/inaccel/docker/internal"
 	"github.com/inaccel/docker/pkg/system"
+	"github.com/inaccel/docker/pkg/xdg"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -19,6 +20,11 @@ var (
 		Short: "Create and start containers",
 		Args:  cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
+			rootless, err := internal.Rootless()
+			if err != nil {
+				return err
+			}
+
 			var cmd *system.Cmd
 
 			if up.GetBool("pull") {
@@ -42,6 +48,16 @@ var (
 			cmd.Flag("host", internal.Host)
 			cmd.Flag("log-level", viper.GetString("log-level"))
 			cmd.Arg("run")
+			cmd.Flag("env", fmt.Sprintf("%s=%s", "DOCKER_HOST_PATH", internal.Host.Path))
+			if rootless {
+				cmd.Flag("env", fmt.Sprintf("%s=%s", "XDG_CACHE_HOME", xdg.CacheHome))
+				cmd.Flag("env", fmt.Sprintf("%s=%s", "XDG_CONFIG_DIRS", strings.Join(xdg.ConfigDirs, ":")))
+				cmd.Flag("env", fmt.Sprintf("%s=%s", "XDG_CONFIG_HOME", xdg.ConfigHome))
+				cmd.Flag("env", fmt.Sprintf("%s=%s", "XDG_DATA_DIRS", strings.Join(xdg.DataDirs, ":")))
+				cmd.Flag("env", fmt.Sprintf("%s=%s", "XDG_DATA_HOME", xdg.DataHome))
+				cmd.Flag("env", fmt.Sprintf("%s=%s", "XDG_RUNTIME_DIR", xdg.RuntimeDir))
+				cmd.Flag("env", fmt.Sprintf("%s=%s", "XDG_STATE_HOME", xdg.StateHome))
+			}
 			cmd.Flag("env", up.GetStringSlice("env"))
 			if len(up.GetString("env-file")) > 0 {
 				cmd.Flag("env-file", up.GetString("env-file"))
