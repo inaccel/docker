@@ -14,11 +14,12 @@ builds:
 archives:
 - files:
   - none*
+  id: archive
   name_template: "{{ .Os }}-{{ .Arch }}"
 changelog:
   filters:
     exclude:
-    - '[APP]'
+    - '\[APP\]'
 checksum:
   name_template: checksums.txt
 nfpms:
