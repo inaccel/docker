@@ -32,7 +32,7 @@ var (
 				cmd.Flag("host", internal.Host)
 				cmd.Flag("log-level", viper.GetString("log-level"))
 				cmd.Arg("pull")
-				if strings.Contains(up.GetString("tag"), ":") {
+				if strings.ContainsAny(up.GetString("tag"), "/:") {
 					cmd.Arg(up.GetString("tag"))
 				} else {
 					cmd.Arg(fmt.Sprintf("%s:%s", "inaccel/fpga-operator", up.GetString("tag")))
@@ -67,7 +67,7 @@ var (
 			cmd.Flag("interactive", true)
 			cmd.Flag("rm", true)
 			cmd.Flag("volume", fmt.Sprintf("%s:%s", internal.Host.Path, "/var/run/docker.sock"))
-			if strings.Contains(up.GetString("tag"), ":") {
+			if strings.ContainsAny(up.GetString("tag"), "/:") {
 				cmd.Arg(up.GetString("tag"))
 			} else {
 				cmd.Arg(fmt.Sprintf("%s:%s", "inaccel/fpga-operator", up.GetString("tag")))
