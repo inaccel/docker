@@ -77,6 +77,7 @@ var (
 			cmd.Flag("project-name", run.GetString("project-name"))
 			cmd.Arg("run")
 			cmd.Flag("rm", true)
+			cmd.Flag("service-ports", true)
 			cmd.Arg(args...)
 			cmd.Std(os.Stdin, os.Stdout, os.Stderr)
 
