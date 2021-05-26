@@ -72,7 +72,6 @@ var (
 			} else {
 				cmd.Arg(fmt.Sprintf("%s:%s", "inaccel/fpga-operator", up.GetString("tag")))
 			}
-			cmd.Arg("docker-compose")
 			cmd.Flag("profile", up.GetStringSlice("profile"))
 			cmd.Flag("project-name", up.GetString("project-name"))
 			cmd.Arg("up")
