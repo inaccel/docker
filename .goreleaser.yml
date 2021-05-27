@@ -5,6 +5,8 @@ before:
   - go mod download
 builds:
 - binary: docker-inaccel
+  env:
+  - CGO_ENABLED=0
   goarch:
   - amd64
   goos:
