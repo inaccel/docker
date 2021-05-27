@@ -18,7 +18,7 @@ var (
 		Use:   "down [OPTIONS]",
 		Short: "Stop and remove containers, networks and volumes",
 		Args:  cobra.NoArgs,
-		RunE: func(_ *cobra.Command, args []string) error {
+		PreRunE: func(_ *cobra.Command, _ []string) error {
 			var cmd *system.Cmd
 
 			cmd = system.Command("docker")
@@ -50,6 +50,11 @@ var (
 				}
 			}
 
+			return nil
+		},
+		RunE: func(_ *cobra.Command, _ []string) error {
+			var cmd *system.Cmd
+
 			cmd = system.Command("docker")
 			cmd.Flag("host", internal.Host)
 			cmd.Flag("log-level", viper.GetString("log-level"))
@@ -57,11 +62,39 @@ var (
 			cmd.Flag("all", true)
 			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", down.GetString("project-name")))
 			cmd.Flag("force", true)
-			cmd.Flag("volumes", true)
 			cmd.Std(nil, nil, os.Stderr)
 
 			if err := cmd.Run(viper.GetBool("debug")); err != nil {
 				return err
+			}
+
+			cmd = system.Command("docker")
+			cmd.Flag("host", internal.Host)
+			cmd.Flag("log-level", viper.GetString("log-level"))
+			cmd.Arg("volume", "ls")
+			cmd.Flag("filter", "dangling=true")
+			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", down.GetString("project-name")))
+			cmd.Flag("format", `{{ .Name }}`)
+			cmd.Std(nil, nil, os.Stderr)
+
+			out, err := cmd.Out(viper.GetBool("debug"))
+			if err != nil {
+				return err
+			}
+
+			names := strings.Fields(out)
+
+			if len(names) > 0 {
+				cmd = system.Command("docker")
+				cmd.Flag("host", internal.Host)
+				cmd.Flag("log-level", viper.GetString("log-level"))
+				cmd.Arg("volume", "rm")
+				cmd.Arg(names...)
+				cmd.Std(nil, nil, os.Stderr)
+
+				if err := cmd.Run(viper.GetBool("debug")); err != nil {
+					return err
+				}
 			}
 
 			return nil
