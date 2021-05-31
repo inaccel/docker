@@ -105,4 +105,5 @@ var (
 func init() {
 	Down.Flags().StringP("project-name", "p", "inaccel", "Specify an alternate project name")
 	down.BindPFlag("project-name", Down.Flags().Lookup("project-name"))
+	down.BindEnv("project-name", "INACCEL_PROJECT_NAME")
 }

@@ -99,6 +99,7 @@ func init() {
 
 	Exec.Flags().StringP("project-name", "p", "inaccel", "Specify an alternate project name")
 	exec.BindPFlag("project-name", Exec.Flags().Lookup("project-name"))
+	exec.BindEnv("project-name", "INACCEL_PROJECT_NAME")
 
 	Exec.Flags().StringP("service", "s", "", "Service name")
 	exec.BindPFlag("service", Exec.Flags().Lookup("service"))

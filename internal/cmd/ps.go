@@ -47,6 +47,7 @@ func init() {
 
 	Ps.Flags().StringP("project-name", "p", "inaccel", "Specify an alternate project name")
 	ps.BindPFlag("project-name", Ps.Flags().Lookup("project-name"))
+	ps.BindEnv("project-name", "INACCEL_PROJECT_NAME")
 
 	Ps.Flags().BoolP("quiet", "q", false, "Only display container IDs")
 	ps.BindPFlag("quiet", Ps.Flags().Lookup("quiet"))

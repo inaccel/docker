@@ -99,6 +99,7 @@ func init() {
 
 	Run.Flags().StringP("project-name", "p", "inaccel", "Specify an alternate project name")
 	run.BindPFlag("project-name", Run.Flags().Lookup("project-name"))
+	run.BindEnv("project-name", "INACCEL_PROJECT_NAME")
 
 	Run.Flags().Bool("pull", false, "Always attempt to pull a newer version of the image")
 	run.BindPFlag("pull", Run.Flags().Lookup("pull"))

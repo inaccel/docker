@@ -97,6 +97,7 @@ func init() {
 
 	Logs.Flags().StringP("project-name", "p", "inaccel", "Specify an alternate project name")
 	logs.BindPFlag("project-name", Logs.Flags().Lookup("project-name"))
+	logs.BindEnv("project-name", "INACCEL_PROJECT_NAME")
 
 	Logs.Flags().StringP("service", "s", "", "Service name")
 	logs.BindPFlag("service", Logs.Flags().Lookup("service"))

@@ -97,9 +97,11 @@ func init() {
 
 	Up.Flags().StringSlice("profile", []string{}, "Specify a profile to enable")
 	up.BindPFlag("profile", Up.Flags().Lookup("profile"))
+	up.BindEnv("profile", "INACCEL_PROFILES")
 
 	Up.Flags().StringP("project-name", "p", "inaccel", "Specify an alternate project name")
 	up.BindPFlag("project-name", Up.Flags().Lookup("project-name"))
+	up.BindEnv("project-name", "INACCEL_PROJECT_NAME")
 
 	Up.Flags().Bool("pull", false, "Always attempt to pull a newer version of the image")
 	up.BindPFlag("pull", Up.Flags().Lookup("pull"))
