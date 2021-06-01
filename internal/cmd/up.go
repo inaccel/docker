@@ -16,10 +16,10 @@ var (
 	up = viper.New()
 
 	Up = &cobra.Command{
-		Use:   "up [OPTIONS]",
+		Use:   "up [OPTIONS] [SERVICE]",
 		Short: "Create and start containers",
-		Args:  cobra.NoArgs,
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Args:  cobra.MaximumNArgs(1),
+		RunE: func(_ *cobra.Command, args []string) error {
 			rootless, err := internal.Rootless()
 			if err != nil {
 				return err
@@ -72,10 +72,14 @@ var (
 			} else {
 				cmd.Arg(fmt.Sprintf("%s:%s", "inaccel/fpga-operator", up.GetString("tag")))
 			}
+			cmd.Flag("ansi", "always")
 			cmd.Flag("profile", up.GetStringSlice("profile"))
 			cmd.Flag("project-name", up.GetString("project-name"))
 			cmd.Arg("up")
 			cmd.Flag("detach", true)
+			if len(args) > 0 {
+				cmd.Arg(args[0])
+			}
 			cmd.Std(nil, os.Stdout, os.Stderr)
 
 			if err := cmd.Run(viper.GetBool("debug")); err != nil {

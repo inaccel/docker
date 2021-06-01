@@ -73,6 +73,7 @@ var (
 			} else {
 				cmd.Arg(fmt.Sprintf("%s:%s", "inaccel/fpga-operator", run.GetString("tag")))
 			}
+			cmd.Flag("ansi", "always")
 			cmd.Flag("project-name", run.GetString("project-name"))
 			cmd.Arg("run")
 			cmd.Flag("rm", true)

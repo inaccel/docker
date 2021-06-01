@@ -15,10 +15,10 @@ var (
 	down = viper.New()
 
 	Down = &cobra.Command{
-		Use:   "down [OPTIONS]",
+		Use:   "down [OPTIONS] [SERVICE]",
 		Short: "Stop and remove containers, networks and volumes",
-		Args:  cobra.NoArgs,
-		PreRunE: func(_ *cobra.Command, _ []string) error {
+		Args:  cobra.MaximumNArgs(1),
+		PreRunE: func(_ *cobra.Command, args []string) error {
 			var cmd *system.Cmd
 
 			cmd = system.Command("docker")
@@ -27,6 +27,9 @@ var (
 			cmd.Arg("ps")
 			cmd.Flag("filter", "label=com.docker.compose.oneoff=False")
 			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", down.GetString("project-name")))
+			if len(args) > 0 {
+				cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.service=%s", args[0]))
+			}
 			cmd.Flag("format", `{{ .ID }}`)
 			cmd.Std(nil, nil, os.Stderr)
 
@@ -52,7 +55,7 @@ var (
 
 			return nil
 		},
-		RunE: func(_ *cobra.Command, _ []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			var cmd *system.Cmd
 
 			cmd = system.Command("docker")
