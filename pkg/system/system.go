@@ -27,7 +27,9 @@ func Command(name string) *Cmd {
 	}
 }
 
-func (cmd *Cmd) debug(args []string) {
+func (cmd *Cmd) debug() {
+	args := append([]string{cmd.name}, cmd.arg...)
+
 	for index, arg := range args {
 		for _, r := range arg {
 			if unicode.IsSpace(r) {
@@ -65,7 +67,7 @@ func (cmd *Cmd) Err(debug bool) (string, error) {
 	}
 
 	if debug {
-		cmd.debug(command.Args)
+		cmd.debug()
 	}
 
 	err := command.Run()
@@ -121,7 +123,7 @@ func (cmd *Cmd) Out(debug bool) (string, error) {
 	command.Stderr = cmd.stderr
 
 	if debug {
-		cmd.debug(command.Args)
+		cmd.debug()
 	}
 
 	err := command.Run()
@@ -146,7 +148,7 @@ func (cmd *Cmd) Run(debug bool) error {
 	command.Stderr = cmd.stderr
 
 	if debug {
-		cmd.debug(command.Args)
+		cmd.debug()
 	}
 
 	err := command.Run()
