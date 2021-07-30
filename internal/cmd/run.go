@@ -77,6 +77,7 @@ var (
 			cmd.Flag("ansi", "always")
 			cmd.Flag("project-name", run.GetString("project-name"))
 			cmd.Arg("run")
+			cmd.Flag("entrypoint", run.GetString("entrypoint"))
 			cmd.Flag("rm", true)
 			cmd.Flag("service-ports", true)
 			cmd.Arg(args...)
@@ -92,6 +93,9 @@ var (
 )
 
 func init() {
+	Run.Flags().String("entrypoint", "", "Override the entrypoint of the service")
+	run.BindPFlag("entrypoint", Run.Flags().Lookup("entrypoint"))
+
 	Run.Flags().StringSliceP("env", "e", []string{}, "Set environment variables")
 	run.BindPFlag("env", Run.Flags().Lookup("env"))
 
