@@ -21,6 +21,17 @@ services:
     - /etc/localtime:/etc/localtime:ro
     - ${XDG_STATE_HOME:-/var/lib}/inaccel:/var/lib/inaccel:rslave
     - runtimes:/var/opt/inaccel/runtimes:ro
+  driver:
+    environment:
+      DRIVER_SYSROOT_DIR: /host
+    image: ${driver_image}:${driver_tag}
+    pid: host
+    privileged: true
+    profiles:
+    - disabled
+    restart: on-failure
+    volumes:
+    - /:/host
   mkrt:
     environment:
       MKRT_CONFIG_PATH: ${XDG_CONFIG_HOME:-/etc}/inaccel/runtimes
