@@ -35,7 +35,7 @@ var (
 				if strings.ContainsAny(config.GetString("tag"), "/:") {
 					cmd.Arg(config.GetString("tag"))
 				} else {
-					cmd.Arg(fmt.Sprintf("%s:%s", "inaccel/fpga-operator", config.GetString("tag")))
+					cmd.Arg(fmt.Sprintf("inaccel/%s:%s", internal.Config, config.GetString("tag")))
 				}
 				cmd.Std(nil, os.Stdout, os.Stderr)
 
@@ -71,7 +71,7 @@ var (
 			if strings.ContainsAny(config.GetString("tag"), "/:") {
 				cmd.Arg(config.GetString("tag"))
 			} else {
-				cmd.Arg(fmt.Sprintf("%s:%s", "inaccel/fpga-operator", config.GetString("tag")))
+				cmd.Arg(fmt.Sprintf("inaccel/%s:%s", internal.Config, config.GetString("tag")))
 			}
 			cmd.Flag("ansi", "always")
 			cmd.Arg("config")

@@ -35,7 +35,7 @@ var (
 				if strings.ContainsAny(up.GetString("tag"), "/:") {
 					cmd.Arg(up.GetString("tag"))
 				} else {
-					cmd.Arg(fmt.Sprintf("%s:%s", "inaccel/fpga-operator", up.GetString("tag")))
+					cmd.Arg(fmt.Sprintf("inaccel/%s:%s", internal.Config, up.GetString("tag")))
 				}
 				cmd.Std(nil, os.Stdout, os.Stderr)
 
@@ -71,7 +71,7 @@ var (
 			if strings.ContainsAny(up.GetString("tag"), "/:") {
 				cmd.Arg(up.GetString("tag"))
 			} else {
-				cmd.Arg(fmt.Sprintf("%s:%s", "inaccel/fpga-operator", up.GetString("tag")))
+				cmd.Arg(fmt.Sprintf("inaccel/%s:%s", internal.Config, up.GetString("tag")))
 			}
 			cmd.Flag("ansi", "always")
 			cmd.Flag("profile", up.GetStringSlice("profile"))

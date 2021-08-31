@@ -11,6 +11,8 @@ builds:
   - amd64
   goos:
   - linux
+  ldflags:
+  - -X 'github.com/inaccel/docker/internal.Config=fpga-operator'
   main: cmd/main.go
 
 archives:
