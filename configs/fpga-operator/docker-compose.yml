@@ -6,7 +6,7 @@ services:
     environment:
       FPGAS: ${coral_fpgas}
       HTTPS_PROXY: ${coral_httpsProxy}
-      LICENSE: ${license:?The license variable is not set.}
+      LICENSE: ${license}
       LOG_LEVEL: ${coral_logLevel}
     image: ${coral_image}:${coral_tag}
     labels:
