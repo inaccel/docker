@@ -25,6 +25,7 @@ services:
     environment:
       DRIVER_SYSROOT_DIR: /host
     image: ${driver_image}:${driver_tag}
+    network_mode: host
     pid: host
     privileged: true
     profiles:
