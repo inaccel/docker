@@ -14,6 +14,7 @@ import (
 var (
 	down = viper.New()
 
+	// Down : docker inaccel down
 	Down = &cobra.Command{
 		Use:   "down [OPTIONS] [SERVICE]",
 		Short: "Stop and remove containers, networks and volumes",

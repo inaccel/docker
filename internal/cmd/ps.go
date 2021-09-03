@@ -13,6 +13,7 @@ import (
 var (
 	ps = viper.New()
 
+	// Ps : docker inaccel ps
 	Ps = &cobra.Command{
 		Use:   "ps [OPTIONS]",
 		Short: "List containers",

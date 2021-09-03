@@ -15,8 +15,9 @@ import (
 var (
 	run = viper.New()
 
+	// Run : docker inaccel run
 	Run = &cobra.Command{
-		Use:   "run [OPTIONS] SERVICE [COMMAND] [ARGS...]",
+		Use:   "run [OPTIONS] SERVICE [COMMAND] [ARG...]",
 		Short: "Run a one-off command",
 		Args:  cobra.MinimumNArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {

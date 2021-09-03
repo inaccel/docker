@@ -15,6 +15,7 @@ import (
 var (
 	up = viper.New()
 
+	// Up : docker inaccel up
 	Up = &cobra.Command{
 		Use:   "up [OPTIONS] [SERVICE]",
 		Short: "Create and start containers",

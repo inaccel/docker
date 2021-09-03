@@ -15,6 +15,7 @@ import (
 var (
 	logs = viper.New()
 
+	// Logs : docker inaccel logs
 	Logs = &cobra.Command{
 		Use:   "logs [OPTIONS] [PATTERN]",
 		Short: "View output from containers",

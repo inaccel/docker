@@ -14,6 +14,7 @@ import (
 var (
 	exec = viper.New()
 
+	// Exec : docker inaccel exec
 	Exec = &cobra.Command{
 		Use:   "exec [OPTIONS] COMMAND [ARG...]",
 		Short: "Execute a command in a running container",

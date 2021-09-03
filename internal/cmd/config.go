@@ -15,6 +15,7 @@ import (
 var (
 	config = viper.New()
 
+	// Config : docker inaccel config
 	Config = &cobra.Command{
 		Use:   "config [OPTIONS]",
 		Short: "Validate and view the config file",
