@@ -61,6 +61,7 @@ var (
 			cmd.Arg("logs")
 			cmd.Flag("follow", logs.GetBool("follow"))
 			cmd.Flag("tail", logs.GetString("tail"))
+			cmd.Flag("timestamps", logs.GetBool("timestamps"))
 			cmd.Arg(fmt.Sprintf("%s_%s_%d", viper.GetString("project-name"), logs.GetString("service"), logs.GetInt("index")))
 			switch len(args) {
 			case 0:
@@ -101,4 +102,7 @@ func init() {
 
 	Logs.Flags().StringP("tail", "n", "10", "Number of lines to show from the end of the logs")
 	logs.BindPFlag("tail", Logs.Flags().Lookup("tail"))
+
+	Logs.Flags().BoolP("timestamps", "t", false, "Show timestamps")
+	logs.BindPFlag("timestamps", Logs.Flags().Lookup("timestamps"))
 }

@@ -79,8 +79,14 @@ var (
 			cmd.Flag("project-name", viper.GetString("project-name"))
 			cmd.Arg("run")
 			cmd.Flag("entrypoint", run.GetString("entrypoint"))
+			cmd.Flag("e", run.GetStringSlice("env"))
+			cmd.Flag("no-deps", run.GetBool("no-deps"))
+			cmd.Flag("publish", run.GetStringSlice("publish"))
 			cmd.Flag("rm", true)
 			cmd.Flag("service-ports", true)
+			cmd.Flag("user", run.GetString("user"))
+			cmd.Flag("volume", run.GetStringSlice("volume"))
+			cmd.Flag("workdir", run.GetString("workdir"))
 			cmd.Arg(args...)
 			cmd.Std(os.Stdin, os.Stdout, os.Stderr)
 
@@ -96,4 +102,22 @@ var (
 func init() {
 	Run.Flags().String("entrypoint", "", "Override the entrypoint of the container")
 	run.BindPFlag("entrypoint", Run.Flags().Lookup("entrypoint"))
+
+	Run.Flags().StringSliceP("env", "e", []string{}, "Set environment variables")
+	run.BindPFlag("env", Run.Flags().Lookup("env"))
+
+	Run.Flags().Bool("no-deps", false, "Don't start linked services")
+	run.BindPFlag("no-deps", Run.Flags().Lookup("no-deps"))
+
+	Run.Flags().StringSliceP("publish", "p", []string{}, "Publish a container's port(s) to the host")
+	run.BindPFlag("publish", Run.Flags().Lookup("publish"))
+
+	Run.Flags().StringP("user", "u", "", "Username or UID (format: <name|uid>[:<group|gid>])")
+	run.BindPFlag("user", Run.Flags().Lookup("user"))
+
+	Run.Flags().StringSliceP("volume", "v", []string{}, "Bind mount a volume")
+	run.BindPFlag("volume", Run.Flags().Lookup("volume"))
+
+	Run.Flags().StringP("workdir", "w", "", "Working directory inside the container")
+	run.BindPFlag("workdir", Run.Flags().Lookup("workdir"))
 }

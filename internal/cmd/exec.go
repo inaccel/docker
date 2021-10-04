@@ -79,8 +79,11 @@ var (
 			cmd.Flag("host", internal.Host)
 			cmd.Flag("log-level", viper.GetString("log-level"))
 			cmd.Arg("exec")
+			cmd.Flag("env", exec.GetStringSlice("env"))
 			cmd.Flag("interactive", true)
 			cmd.Flag("tty", true)
+			cmd.Flag("user", exec.GetString("user"))
+			cmd.Flag("workdir", exec.GetString("workdir"))
 			cmd.Arg(fmt.Sprintf("%s_%s_%d", viper.GetString("project-name"), exec.GetString("service"), exec.GetInt("index")))
 			cmd.Arg(args...)
 			cmd.Std(os.Stdin, os.Stdout, os.Stderr)
@@ -100,4 +103,13 @@ func init() {
 
 	Exec.Flags().StringP("service", "s", "", "Service name")
 	exec.BindPFlag("service", Exec.Flags().Lookup("service"))
+
+	Exec.Flags().StringSliceP("env", "e", []string{}, "Set environment variables")
+	exec.BindPFlag("env", Exec.Flags().Lookup("env"))
+
+	Exec.Flags().StringP("user", "u", "", "Username or UID (format: <name|uid>[:<group|gid>])")
+	exec.BindPFlag("user", Exec.Flags().Lookup("user"))
+
+	Exec.Flags().StringP("workdir", "w", "", "Working directory inside the container")
+	exec.BindPFlag("workdir", Exec.Flags().Lookup("workdir"))
 }

@@ -78,6 +78,7 @@ var (
 			cmd.Arg("config")
 			cmd.Flag("profiles", config.GetBool("profiles"))
 			cmd.Flag("quiet", config.GetBool("quiet"))
+			cmd.Flag("resolve-image-digests", config.GetBool("resolve-image-digests"))
 			cmd.Flag("services", config.GetBool("services"))
 			cmd.Std(nil, os.Stdout, os.Stderr)
 
@@ -96,6 +97,9 @@ func init() {
 
 	Config.Flags().BoolP("quiet", "q", false, "Only validate the configuration, don't print anything")
 	config.BindPFlag("quiet", Config.Flags().Lookup("quiet"))
+
+	Config.Flags().Bool("resolve-image-digests", false, "Pin image tags to digests")
+	config.BindPFlag("resolve-image-digests", Config.Flags().Lookup("resolve-image-digests"))
 
 	Config.Flags().Bool("services", false, "Print the service names, one per line")
 	config.BindPFlag("services", Config.Flags().Lookup("services"))

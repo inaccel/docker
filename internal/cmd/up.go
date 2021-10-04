@@ -79,6 +79,10 @@ var (
 			cmd.Flag("project-name", viper.GetString("project-name"))
 			cmd.Arg("up")
 			cmd.Flag("detach", true)
+			cmd.Flag("always-recreate-deps", up.GetBool("always-recreate-deps"))
+			cmd.Flag("force-recreate", up.GetBool("force-recreate"))
+			cmd.Flag("no-deps", up.GetBool("no-deps"))
+			cmd.Flag("no-recreate", up.GetBool("no-recreate"))
 			if len(args) > 0 {
 				cmd.Arg(args[0])
 			}
@@ -92,3 +96,17 @@ var (
 		},
 	}
 )
+
+func init() {
+	Up.Flags().Bool("always-recreate-deps", false, "Recreate dependent containers")
+	up.BindPFlag("always-recreate-deps", Up.Flags().Lookup("always-recreate-deps"))
+
+	Up.Flags().Bool("force-recreate", false, "Recreate containers even if their configuration and image haven't changed")
+	up.BindPFlag("force-recreate", Up.Flags().Lookup("force-recreate"))
+
+	Up.Flags().Bool("no-deps", false, "Don't start linked services")
+	up.BindPFlag("no-deps", Up.Flags().Lookup("no-deps"))
+
+	Up.Flags().Bool("no-recreate", false, "If containers already exist, don't recreate them")
+	up.BindPFlag("no-recreate", Up.Flags().Lookup("no-recreate"))
+}
