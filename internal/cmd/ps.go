@@ -28,7 +28,9 @@ var (
 			cmd.Flag("all", true)
 			cmd.Flag("filter", "label=com.docker.compose.oneoff=False")
 			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", viper.GetString("project-name")))
-			cmd.Flag("format", `table {{ .ID }}\t{{ .Image }}\t{{ .RunningFor }}\t{{ .Status }}\t{{ if eq ( .Label "com.docker.compose.service" ) "service" }}SERVICE{{ else }}{{ .Label "com.docker.compose.service" }}{{ end }}\t{{ if eq ( .Label "com.docker.compose.container-number" ) "container number" }}INDEX{{ else }}{{ .Label "com.docker.compose.container-number" }}{{ end }}`)
+			if !ps.GetBool("quiet") {
+				cmd.Flag("format", `table {{ .ID }}\t{{ .Image }}\t{{ .RunningFor }}\t{{ .Status }}\t{{ if eq ( .Label "com.docker.compose.service" ) "service" }}SERVICE{{ else }}{{ .Label "com.docker.compose.service" }}{{ end }}\t{{ if eq ( .Label "com.docker.compose.container-number" ) "container number" }}INDEX{{ else }}{{ .Label "com.docker.compose.container-number" }}{{ end }}`)
+			}
 			cmd.Flag("no-trunc", ps.GetBool("no-trunc"))
 			cmd.Flag("quiet", ps.GetBool("quiet"))
 			cmd.Std(nil, os.Stdout, os.Stderr)
