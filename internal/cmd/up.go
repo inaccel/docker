@@ -28,15 +28,15 @@ var (
 
 			var cmd *system.Cmd
 
-			if up.GetBool("pull") {
+			if viper.GetBool("pull") {
 				cmd = system.Command("docker")
 				cmd.Flag("host", internal.Host)
 				cmd.Flag("log-level", viper.GetString("log-level"))
 				cmd.Arg("pull")
-				if strings.ContainsAny(up.GetString("tag"), "/:") {
-					cmd.Arg(up.GetString("tag"))
+				if strings.ContainsAny(viper.GetString("tag"), "/:") {
+					cmd.Arg(viper.GetString("tag"))
 				} else {
-					cmd.Arg(fmt.Sprintf("inaccel/%s:%s", internal.Config, up.GetString("tag")))
+					cmd.Arg(fmt.Sprintf("inaccel/%s:%s", internal.Config, viper.GetString("tag")))
 				}
 				cmd.Std(nil, os.Stdout, os.Stderr)
 
@@ -60,23 +60,23 @@ var (
 				cmd.Flag("env", fmt.Sprintf("%s=%s", "XDG_RUNTIME_DIR", xdg.RuntimeDir))
 				cmd.Flag("env", fmt.Sprintf("%s=%s", "XDG_STATE_HOME", xdg.StateHome))
 			}
-			cmd.Flag("env", up.GetStringSlice("env"))
-			if len(up.GetString("env-file")) > 0 {
-				cmd.Flag("env-file", up.GetString("env-file"))
+			cmd.Flag("env", viper.GetStringSlice("env"))
+			if len(viper.GetString("env-file")) > 0 {
+				cmd.Flag("env-file", viper.GetString("env-file"))
 			} else if _, err := os.Stat(".env"); err == nil {
 				cmd.Flag("env-file", ".env")
 			}
 			cmd.Flag("interactive", true)
 			cmd.Flag("rm", true)
 			cmd.Flag("volume", fmt.Sprintf("%s:%s", internal.Host.Path, "/var/run/docker.sock"))
-			if strings.ContainsAny(up.GetString("tag"), "/:") {
-				cmd.Arg(up.GetString("tag"))
+			if strings.ContainsAny(viper.GetString("tag"), "/:") {
+				cmd.Arg(viper.GetString("tag"))
 			} else {
-				cmd.Arg(fmt.Sprintf("inaccel/%s:%s", internal.Config, up.GetString("tag")))
+				cmd.Arg(fmt.Sprintf("inaccel/%s:%s", internal.Config, viper.GetString("tag")))
 			}
 			cmd.Flag("ansi", "always")
-			cmd.Flag("profile", up.GetStringSlice("profile"))
-			cmd.Flag("project-name", up.GetString("project-name"))
+			cmd.Flag("profile", viper.GetStringSlice("profile"))
+			cmd.Flag("project-name", viper.GetString("project-name"))
 			cmd.Arg("up")
 			cmd.Flag("detach", true)
 			if len(args) > 0 {
@@ -92,26 +92,3 @@ var (
 		},
 	}
 )
-
-func init() {
-	Up.Flags().StringSliceP("env", "e", []string{}, "Set environment variables")
-	up.BindPFlag("env", Up.Flags().Lookup("env"))
-
-	Up.Flags().String("env-file", "", "Specify an alternate environment file")
-	Up.MarkFlagFilename("env-file")
-	up.BindPFlag("env-file", Up.Flags().Lookup("env-file"))
-
-	Up.Flags().StringSlice("profile", []string{}, "Specify a profile to enable")
-	up.BindPFlag("profile", Up.Flags().Lookup("profile"))
-	up.BindEnv("profile", "INACCEL_PROFILES")
-
-	Up.Flags().StringP("project-name", "p", "inaccel", "Specify an alternate project name")
-	up.BindPFlag("project-name", Up.Flags().Lookup("project-name"))
-	up.BindEnv("project-name", "INACCEL_PROJECT_NAME")
-
-	Up.Flags().Bool("pull", false, "Always attempt to pull a newer version of the image")
-	up.BindPFlag("pull", Up.Flags().Lookup("pull"))
-
-	Up.Flags().StringP("tag", "t", "latest", "Tag and optionally a name in the 'name:tag' format")
-	up.BindPFlag("tag", Up.Flags().Lookup("tag"))
-}

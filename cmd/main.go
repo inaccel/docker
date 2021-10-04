@@ -41,6 +41,27 @@ func main() {
 			},
 		}
 
+		inaccel.Flags().StringSliceP("env", "e", []string{}, "Set environment variables")
+		viper.BindPFlag("env", inaccel.Flags().Lookup("env"))
+
+		inaccel.Flags().String("env-file", "", "Specify an alternate environment file")
+		inaccel.MarkFlagFilename("env-file")
+		viper.BindPFlag("env-file", inaccel.Flags().Lookup("env-file"))
+
+		inaccel.Flags().StringSlice("profile", []string{}, "Specify a profile to enable")
+		viper.BindPFlag("profile", inaccel.Flags().Lookup("profile"))
+		viper.BindEnv("profile", "INACCEL_PROFILES")
+
+		inaccel.Flags().StringP("project-name", "p", "inaccel", "Specify an alternate project name")
+		viper.BindPFlag("project-name", inaccel.Flags().Lookup("project-name"))
+		viper.BindEnv("project-name", "INACCEL_PROJECT_NAME")
+
+		inaccel.Flags().Bool("pull", false, "Always attempt to pull a newer version of the image")
+		viper.BindPFlag("pull", inaccel.Flags().Lookup("pull"))
+
+		inaccel.Flags().StringP("tag", "t", "latest", "Tag and optionally a name in the 'name:tag' format")
+		viper.BindPFlag("tag", inaccel.Flags().Lookup("tag"))
+
 		inaccel.AddCommand(cmd.Config, cmd.Down, cmd.Exec, cmd.Logs, cmd.Ps, cmd.Run, cmd.Up)
 
 		return inaccel

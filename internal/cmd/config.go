@@ -28,15 +28,15 @@ var (
 
 			var cmd *system.Cmd
 
-			if config.GetBool("pull") {
+			if viper.GetBool("pull") {
 				cmd = system.Command("docker")
 				cmd.Flag("host", internal.Host)
 				cmd.Flag("log-level", viper.GetString("log-level"))
 				cmd.Arg("pull")
-				if strings.ContainsAny(config.GetString("tag"), "/:") {
-					cmd.Arg(config.GetString("tag"))
+				if strings.ContainsAny(viper.GetString("tag"), "/:") {
+					cmd.Arg(viper.GetString("tag"))
 				} else {
-					cmd.Arg(fmt.Sprintf("inaccel/%s:%s", internal.Config, config.GetString("tag")))
+					cmd.Arg(fmt.Sprintf("inaccel/%s:%s", internal.Config, viper.GetString("tag")))
 				}
 				cmd.Std(nil, os.Stdout, os.Stderr)
 
@@ -60,19 +60,19 @@ var (
 				cmd.Flag("env", fmt.Sprintf("%s=%s", "XDG_RUNTIME_DIR", xdg.RuntimeDir))
 				cmd.Flag("env", fmt.Sprintf("%s=%s", "XDG_STATE_HOME", xdg.StateHome))
 			}
-			cmd.Flag("env", config.GetStringSlice("env"))
-			if len(config.GetString("env-file")) > 0 {
-				cmd.Flag("env-file", config.GetString("env-file"))
+			cmd.Flag("env", viper.GetStringSlice("env"))
+			if len(viper.GetString("env-file")) > 0 {
+				cmd.Flag("env-file", viper.GetString("env-file"))
 			} else if _, err := os.Stat(".env"); err == nil {
 				cmd.Flag("env-file", ".env")
 			}
 			cmd.Flag("interactive", true)
 			cmd.Flag("rm", true)
 			cmd.Flag("volume", fmt.Sprintf("%s:%s", internal.Host.Path, "/var/run/docker.sock"))
-			if strings.ContainsAny(config.GetString("tag"), "/:") {
-				cmd.Arg(config.GetString("tag"))
+			if strings.ContainsAny(viper.GetString("tag"), "/:") {
+				cmd.Arg(viper.GetString("tag"))
 			} else {
-				cmd.Arg(fmt.Sprintf("inaccel/%s:%s", internal.Config, config.GetString("tag")))
+				cmd.Arg(fmt.Sprintf("inaccel/%s:%s", internal.Config, viper.GetString("tag")))
 			}
 			cmd.Flag("ansi", "always")
 			cmd.Arg("config")
@@ -91,25 +91,12 @@ var (
 )
 
 func init() {
-	Config.Flags().StringSliceP("env", "e", []string{}, "Set environment variables")
-	config.BindPFlag("env", Config.Flags().Lookup("env"))
-
-	Config.Flags().String("env-file", "", "Specify an alternate environment file")
-	Config.MarkFlagFilename("env-file")
-	config.BindPFlag("env-file", Config.Flags().Lookup("env-file"))
-
 	Config.Flags().Bool("profiles", false, "Print the profile names, one per line")
 	config.BindPFlag("profiles", Config.Flags().Lookup("profiles"))
-
-	Config.Flags().Bool("pull", false, "Always attempt to pull a newer version of the image")
-	config.BindPFlag("pull", Config.Flags().Lookup("pull"))
 
 	Config.Flags().BoolP("quiet", "q", false, "Only validate the configuration, don't print anything")
 	config.BindPFlag("quiet", Config.Flags().Lookup("quiet"))
 
 	Config.Flags().Bool("services", false, "Print the service names, one per line")
 	config.BindPFlag("services", Config.Flags().Lookup("services"))
-
-	Config.Flags().StringP("tag", "t", "latest", "Tag and optionally a name in the 'name:tag' format")
-	config.BindPFlag("tag", Config.Flags().Lookup("tag"))
 }

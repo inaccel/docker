@@ -16,7 +16,7 @@ var (
 
 	// Down : docker inaccel down
 	Down = &cobra.Command{
-		Use:   "down [OPTIONS] [SERVICE]",
+		Use:   "down [SERVICE]",
 		Short: "Stop and remove containers, networks and volumes",
 		Args:  cobra.MaximumNArgs(1),
 		PreRunE: func(_ *cobra.Command, args []string) error {
@@ -27,7 +27,7 @@ var (
 			cmd.Flag("log-level", viper.GetString("log-level"))
 			cmd.Arg("ps")
 			cmd.Flag("filter", "label=com.docker.compose.oneoff=False")
-			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", down.GetString("project-name")))
+			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", viper.GetString("project-name")))
 			if len(args) > 0 {
 				cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.service=%s", args[0]))
 			}
@@ -64,7 +64,7 @@ var (
 			cmd.Flag("log-level", viper.GetString("log-level"))
 			cmd.Arg("system", "prune")
 			cmd.Flag("all", true)
-			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", down.GetString("project-name")))
+			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", viper.GetString("project-name")))
 			cmd.Flag("force", true)
 			cmd.Std(nil, nil, os.Stderr)
 
@@ -77,7 +77,7 @@ var (
 			cmd.Flag("log-level", viper.GetString("log-level"))
 			cmd.Arg("volume", "ls")
 			cmd.Flag("filter", "dangling=true")
-			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", down.GetString("project-name")))
+			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", viper.GetString("project-name")))
 			cmd.Flag("format", `{{ .Name }}`)
 			cmd.Std(nil, nil, os.Stderr)
 
@@ -105,9 +105,3 @@ var (
 		},
 	}
 )
-
-func init() {
-	Down.Flags().StringP("project-name", "p", "inaccel", "Specify an alternate project name")
-	down.BindPFlag("project-name", Down.Flags().Lookup("project-name"))
-	down.BindEnv("project-name", "INACCEL_PROJECT_NAME")
-}

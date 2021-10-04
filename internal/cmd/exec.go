@@ -30,7 +30,7 @@ var (
 				cmd.Flag("all", true)
 				cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.container-number=%d", exec.GetInt("index")))
 				cmd.Flag("filter", "label=com.docker.compose.oneoff=False")
-				cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", exec.GetString("project-name")))
+				cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", viper.GetString("project-name")))
 				cmd.Flag("filter", "label=com.inaccel.docker.default-exec-service=True")
 				cmd.Flag("format", `{{ .Label "com.docker.compose.service" }}`)
 				cmd.Std(nil, nil, os.Stderr)
@@ -45,7 +45,7 @@ var (
 				if len(services) > 0 {
 					exec.Set("service", services[0])
 				} else {
-					return fmt.Errorf("Error: No service (%d) found for %s", exec.GetInt("index"), exec.GetString("project-name"))
+					return fmt.Errorf("Error: No service (%d) found for %s", exec.GetInt("index"), viper.GetString("project-name"))
 				}
 			}
 
@@ -60,7 +60,7 @@ var (
 				cmd.Flag("log-level", viper.GetString("log-level"))
 				cmd.Arg("inspect")
 				cmd.Flag("format", `{{ index .Config.Labels "com.inaccel.docker.default-exec-command" }}`)
-				cmd.Arg(fmt.Sprintf("%s_%s_%d", exec.GetString("project-name"), exec.GetString("service"), exec.GetInt("index")))
+				cmd.Arg(fmt.Sprintf("%s_%s_%d", viper.GetString("project-name"), exec.GetString("service"), exec.GetInt("index")))
 				cmd.Std(nil, nil, os.Stderr)
 
 				out, err := cmd.Out(viper.GetBool("debug"))
@@ -81,7 +81,7 @@ var (
 			cmd.Arg("exec")
 			cmd.Flag("interactive", true)
 			cmd.Flag("tty", true)
-			cmd.Arg(fmt.Sprintf("%s_%s_%d", exec.GetString("project-name"), exec.GetString("service"), exec.GetInt("index")))
+			cmd.Arg(fmt.Sprintf("%s_%s_%d", viper.GetString("project-name"), exec.GetString("service"), exec.GetInt("index")))
 			cmd.Arg(args...)
 			cmd.Std(os.Stdin, os.Stdout, os.Stderr)
 
@@ -97,10 +97,6 @@ var (
 func init() {
 	Exec.Flags().Int("index", 1, "Index of the container if there are multiple instances of a service")
 	exec.BindPFlag("index", Exec.Flags().Lookup("index"))
-
-	Exec.Flags().StringP("project-name", "p", "inaccel", "Specify an alternate project name")
-	exec.BindPFlag("project-name", Exec.Flags().Lookup("project-name"))
-	exec.BindEnv("project-name", "INACCEL_PROJECT_NAME")
 
 	Exec.Flags().StringP("service", "s", "", "Service name")
 	exec.BindPFlag("service", Exec.Flags().Lookup("service"))

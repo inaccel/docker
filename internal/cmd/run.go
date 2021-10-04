@@ -28,15 +28,15 @@ var (
 
 			var cmd *system.Cmd
 
-			if run.GetBool("pull") {
+			if viper.GetBool("pull") {
 				cmd = system.Command("docker")
 				cmd.Flag("host", internal.Host)
 				cmd.Flag("log-level", viper.GetString("log-level"))
 				cmd.Arg("pull")
-				if strings.ContainsAny(run.GetString("tag"), "/:") {
-					cmd.Arg(run.GetString("tag"))
+				if strings.ContainsAny(viper.GetString("tag"), "/:") {
+					cmd.Arg(viper.GetString("tag"))
 				} else {
-					cmd.Arg(fmt.Sprintf("inaccel/%s:%s", internal.Config, run.GetString("tag")))
+					cmd.Arg(fmt.Sprintf("inaccel/%s:%s", internal.Config, viper.GetString("tag")))
 				}
 				cmd.Std(nil, os.Stdout, os.Stderr)
 
@@ -60,9 +60,9 @@ var (
 				cmd.Flag("env", fmt.Sprintf("%s=%s", "XDG_RUNTIME_DIR", xdg.RuntimeDir))
 				cmd.Flag("env", fmt.Sprintf("%s=%s", "XDG_STATE_HOME", xdg.StateHome))
 			}
-			cmd.Flag("env", run.GetStringSlice("env"))
-			if len(run.GetString("env-file")) > 0 {
-				cmd.Flag("env-file", run.GetString("env-file"))
+			cmd.Flag("env", viper.GetStringSlice("env"))
+			if len(viper.GetString("env-file")) > 0 {
+				cmd.Flag("env-file", viper.GetString("env-file"))
 			} else if _, err := os.Stat(".env"); err == nil {
 				cmd.Flag("env-file", ".env")
 			}
@@ -70,13 +70,13 @@ var (
 			cmd.Flag("rm", true)
 			cmd.Flag("tty", true)
 			cmd.Flag("volume", fmt.Sprintf("%s:%s", internal.Host.Path, "/var/run/docker.sock"))
-			if strings.ContainsAny(run.GetString("tag"), "/:") {
-				cmd.Arg(run.GetString("tag"))
+			if strings.ContainsAny(viper.GetString("tag"), "/:") {
+				cmd.Arg(viper.GetString("tag"))
 			} else {
-				cmd.Arg(fmt.Sprintf("inaccel/%s:%s", internal.Config, run.GetString("tag")))
+				cmd.Arg(fmt.Sprintf("inaccel/%s:%s", internal.Config, viper.GetString("tag")))
 			}
 			cmd.Flag("ansi", "always")
-			cmd.Flag("project-name", run.GetString("project-name"))
+			cmd.Flag("project-name", viper.GetString("project-name"))
 			cmd.Arg("run")
 			cmd.Flag("entrypoint", run.GetString("entrypoint"))
 			cmd.Flag("rm", true)
@@ -94,23 +94,6 @@ var (
 )
 
 func init() {
-	Run.Flags().String("entrypoint", "", "Override the entrypoint of the service")
+	Run.Flags().String("entrypoint", "", "Override the entrypoint of the container")
 	run.BindPFlag("entrypoint", Run.Flags().Lookup("entrypoint"))
-
-	Run.Flags().StringSliceP("env", "e", []string{}, "Set environment variables")
-	run.BindPFlag("env", Run.Flags().Lookup("env"))
-
-	Run.Flags().String("env-file", "", "Specify an alternate environment file")
-	Run.MarkFlagFilename("env-file")
-	run.BindPFlag("env-file", Run.Flags().Lookup("env-file"))
-
-	Run.Flags().StringP("project-name", "p", "inaccel", "Specify an alternate project name")
-	run.BindPFlag("project-name", Run.Flags().Lookup("project-name"))
-	run.BindEnv("project-name", "INACCEL_PROJECT_NAME")
-
-	Run.Flags().Bool("pull", false, "Always attempt to pull a newer version of the image")
-	run.BindPFlag("pull", Run.Flags().Lookup("pull"))
-
-	Run.Flags().StringP("tag", "t", "latest", "Tag and optionally a name in the 'name:tag' format")
-	run.BindPFlag("tag", Run.Flags().Lookup("tag"))
 }

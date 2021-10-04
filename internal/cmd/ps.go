@@ -27,7 +27,7 @@ var (
 			cmd.Arg("ps")
 			cmd.Flag("all", true)
 			cmd.Flag("filter", "label=com.docker.compose.oneoff=False")
-			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", ps.GetString("project-name")))
+			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", viper.GetString("project-name")))
 			cmd.Flag("format", `table {{ .ID }}\t{{ .Image }}\t{{ .RunningFor }}\t{{ .Status }}\t{{ if eq ( .Label "com.docker.compose.service" ) "service" }}SERVICE{{ else }}{{ .Label "com.docker.compose.service" }}{{ end }}\t{{ if eq ( .Label "com.docker.compose.container-number" ) "container number" }}INDEX{{ else }}{{ .Label "com.docker.compose.container-number" }}{{ end }}`)
 			cmd.Flag("no-trunc", ps.GetBool("no-trunc"))
 			cmd.Flag("quiet", ps.GetBool("quiet"))
@@ -45,10 +45,6 @@ var (
 func init() {
 	Ps.Flags().Bool("no-trunc", false, "Don't truncate output")
 	ps.BindPFlag("no-trunc", Ps.Flags().Lookup("no-trunc"))
-
-	Ps.Flags().StringP("project-name", "p", "inaccel", "Specify an alternate project name")
-	ps.BindPFlag("project-name", Ps.Flags().Lookup("project-name"))
-	ps.BindEnv("project-name", "INACCEL_PROJECT_NAME")
 
 	Ps.Flags().BoolP("quiet", "q", false, "Only display container IDs")
 	ps.BindPFlag("quiet", Ps.Flags().Lookup("quiet"))

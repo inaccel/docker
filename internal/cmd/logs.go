@@ -31,7 +31,7 @@ var (
 				cmd.Flag("all", true)
 				cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.container-number=%d", logs.GetInt("index")))
 				cmd.Flag("filter", "label=com.docker.compose.oneoff=False")
-				cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", logs.GetString("project-name")))
+				cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", viper.GetString("project-name")))
 				cmd.Flag("filter", "label=com.inaccel.docker.default-logs-service=True")
 				cmd.Flag("format", `{{ .Label "com.docker.compose.service" }}`)
 				cmd.Std(nil, nil, os.Stderr)
@@ -46,7 +46,7 @@ var (
 				if len(services) > 0 {
 					logs.Set("service", services[0])
 				} else {
-					return fmt.Errorf("Error: No service (%d) found for %s", logs.GetInt("index"), logs.GetString("project-name"))
+					return fmt.Errorf("Error: No service (%d) found for %s", logs.GetInt("index"), viper.GetString("project-name"))
 				}
 			}
 
@@ -61,7 +61,7 @@ var (
 			cmd.Arg("logs")
 			cmd.Flag("follow", logs.GetBool("follow"))
 			cmd.Flag("tail", logs.GetString("tail"))
-			cmd.Arg(fmt.Sprintf("%s_%s_%d", logs.GetString("project-name"), logs.GetString("service"), logs.GetInt("index")))
+			cmd.Arg(fmt.Sprintf("%s_%s_%d", viper.GetString("project-name"), logs.GetString("service"), logs.GetInt("index")))
 			switch len(args) {
 			case 0:
 				cmd.Std(nil, os.Stdout, os.Stderr)
@@ -95,10 +95,6 @@ func init() {
 
 	Logs.Flags().Bool("no-color", false, "Produce monochrome output")
 	logs.BindPFlag("no-color", Logs.Flags().Lookup("no-color"))
-
-	Logs.Flags().StringP("project-name", "p", "inaccel", "Specify an alternate project name")
-	logs.BindPFlag("project-name", Logs.Flags().Lookup("project-name"))
-	logs.BindEnv("project-name", "INACCEL_PROJECT_NAME")
 
 	Logs.Flags().StringP("service", "s", "", "Service name")
 	logs.BindPFlag("service", Logs.Flags().Lookup("service"))
