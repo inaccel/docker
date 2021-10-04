@@ -62,6 +62,9 @@ func main() {
 		inaccel.Flags().StringP("tag", "t", "latest", "Tag and optionally a name in the 'name:tag' format")
 		viper.BindPFlag("tag", inaccel.Flags().Lookup("tag"))
 
+		inaccel.Flags().BoolP("version", "v", false, "Print version information and quit")
+		viper.BindPFlag("version", inaccel.Flags().Lookup("version"))
+
 		inaccel.AddCommand(cmd.Config, cmd.Down, cmd.Exec, cmd.Logs, cmd.Ps, cmd.Run, cmd.Up)
 
 		return inaccel

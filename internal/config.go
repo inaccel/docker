@@ -1,3 +1,3 @@
 package internal
 
-var Config string
+const Config = "fpga-operator"
