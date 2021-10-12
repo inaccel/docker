@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net"
 	"net/url"
 
@@ -52,14 +53,14 @@ func main() {
 		viper.BindPFlag("profile", inaccel.Flags().Lookup("profile"))
 		viper.BindEnv("profile", "INACCEL_PROFILES")
 
-		inaccel.Flags().StringP("project-name", "p", "inaccel", "Specify an alternate project name")
+		inaccel.Flags().StringP("project-name", "p", fmt.Sprintf("inaccel/%s", internal.Config), "Specify an alternate project name")
 		viper.BindPFlag("project-name", inaccel.Flags().Lookup("project-name"))
 		viper.BindEnv("project-name", "INACCEL_PROJECT_NAME")
 
-		inaccel.Flags().Bool("pull", false, "Always attempt to pull a newer version of the image")
+		inaccel.Flags().Bool("pull", false, "Always attempt to pull a newer version of the project")
 		viper.BindPFlag("pull", inaccel.Flags().Lookup("pull"))
 
-		inaccel.Flags().StringP("tag", "t", "latest", "Tag and optionally a name in the 'name:tag' format")
+		inaccel.Flags().StringP("tag", "t", "latest", "Specify the project tag to use")
 		viper.BindPFlag("tag", inaccel.Flags().Lookup("tag"))
 
 		inaccel.Flags().BoolP("version", "v", false, "Print version information and quit")

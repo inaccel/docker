@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/inaccel/docker/internal"
@@ -33,11 +34,7 @@ var (
 				cmd.Flag("host", internal.Host)
 				cmd.Flag("log-level", viper.GetString("log-level"))
 				cmd.Arg("pull")
-				if strings.ContainsAny(viper.GetString("tag"), "/:") {
-					cmd.Arg(viper.GetString("tag"))
-				} else {
-					cmd.Arg(fmt.Sprintf("inaccel/%s:%s", internal.Config, viper.GetString("tag")))
-				}
+				cmd.Arg(fmt.Sprintf("%s:%s", viper.GetString("project-name"), viper.GetString("tag")))
 				cmd.Std(nil, os.Stdout, os.Stderr)
 
 				if err := cmd.Run(viper.GetBool("debug")); err != nil {
@@ -70,13 +67,9 @@ var (
 			cmd.Flag("rm", true)
 			cmd.Flag("tty", true)
 			cmd.Flag("volume", fmt.Sprintf("%s:%s", internal.Host.Path, "/var/run/docker.sock"))
-			if strings.ContainsAny(viper.GetString("tag"), "/:") {
-				cmd.Arg(viper.GetString("tag"))
-			} else {
-				cmd.Arg(fmt.Sprintf("inaccel/%s:%s", internal.Config, viper.GetString("tag")))
-			}
+			cmd.Arg(fmt.Sprintf("%s:%s", viper.GetString("project-name"), viper.GetString("tag")))
 			cmd.Flag("ansi", "always")
-			cmd.Flag("project-name", viper.GetString("project-name"))
+			cmd.Flag("project-name", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_"))
 			cmd.Arg("run")
 			cmd.Flag("entrypoint", run.GetString("entrypoint"))
 			cmd.Flag("e", run.GetStringSlice("env"))

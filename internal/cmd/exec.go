@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/inaccel/docker/internal"
@@ -30,7 +31,7 @@ var (
 				cmd.Flag("all", true)
 				cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.container-number=%d", exec.GetInt("index")))
 				cmd.Flag("filter", "label=com.docker.compose.oneoff=False")
-				cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", viper.GetString("project-name")))
+				cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_")))
 				cmd.Flag("filter", "label=com.inaccel.docker.default-exec-service=True")
 				cmd.Flag("format", `{{ .Label "com.docker.compose.service" }}`)
 				cmd.Std(nil, nil, os.Stderr)
@@ -60,7 +61,7 @@ var (
 				cmd.Flag("log-level", viper.GetString("log-level"))
 				cmd.Arg("inspect")
 				cmd.Flag("format", `{{ index .Config.Labels "com.inaccel.docker.default-exec-command" }}`)
-				cmd.Arg(fmt.Sprintf("%s_%s_%d", viper.GetString("project-name"), exec.GetString("service"), exec.GetInt("index")))
+				cmd.Arg(fmt.Sprintf("%s_%s_%d", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_"), exec.GetString("service"), exec.GetInt("index")))
 				cmd.Std(nil, nil, os.Stderr)
 
 				out, err := cmd.Out(viper.GetBool("debug"))
@@ -84,7 +85,7 @@ var (
 			cmd.Flag("tty", true)
 			cmd.Flag("user", exec.GetString("user"))
 			cmd.Flag("workdir", exec.GetString("workdir"))
-			cmd.Arg(fmt.Sprintf("%s_%s_%d", viper.GetString("project-name"), exec.GetString("service"), exec.GetInt("index")))
+			cmd.Arg(fmt.Sprintf("%s_%s_%d", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_"), exec.GetString("service"), exec.GetInt("index")))
 			cmd.Arg(args...)
 			cmd.Std(os.Stdin, os.Stdout, os.Stderr)
 

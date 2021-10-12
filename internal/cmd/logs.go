@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/inaccel/docker/internal"
@@ -31,7 +32,7 @@ var (
 				cmd.Flag("all", true)
 				cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.container-number=%d", logs.GetInt("index")))
 				cmd.Flag("filter", "label=com.docker.compose.oneoff=False")
-				cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", viper.GetString("project-name")))
+				cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_")))
 				cmd.Flag("filter", "label=com.inaccel.docker.default-logs-service=True")
 				cmd.Flag("format", `{{ .Label "com.docker.compose.service" }}`)
 				cmd.Std(nil, nil, os.Stderr)
@@ -62,7 +63,7 @@ var (
 			cmd.Flag("follow", logs.GetBool("follow"))
 			cmd.Flag("tail", logs.GetString("tail"))
 			cmd.Flag("timestamps", logs.GetBool("timestamps"))
-			cmd.Arg(fmt.Sprintf("%s_%s_%d", viper.GetString("project-name"), logs.GetString("service"), logs.GetInt("index")))
+			cmd.Arg(fmt.Sprintf("%s_%s_%d", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_"), logs.GetString("service"), logs.GetInt("index")))
 			switch len(args) {
 			case 0:
 				cmd.Std(nil, os.Stdout, os.Stderr)

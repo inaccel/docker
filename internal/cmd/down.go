@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/inaccel/docker/internal"
@@ -27,7 +28,7 @@ var (
 			cmd.Flag("log-level", viper.GetString("log-level"))
 			cmd.Arg("ps")
 			cmd.Flag("filter", "label=com.docker.compose.oneoff=False")
-			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", viper.GetString("project-name")))
+			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_")))
 			if len(args) > 0 {
 				cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.service=%s", args[0]))
 			}
@@ -64,7 +65,7 @@ var (
 			cmd.Flag("log-level", viper.GetString("log-level"))
 			cmd.Arg("system", "prune")
 			cmd.Flag("all", true)
-			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", viper.GetString("project-name")))
+			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_")))
 			cmd.Flag("force", true)
 			cmd.Std(nil, nil, os.Stderr)
 
@@ -77,7 +78,7 @@ var (
 			cmd.Flag("log-level", viper.GetString("log-level"))
 			cmd.Arg("volume", "ls")
 			cmd.Flag("filter", "dangling=true")
-			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", viper.GetString("project-name")))
+			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_")))
 			cmd.Flag("format", `{{ .Name }}`)
 			cmd.Std(nil, nil, os.Stderr)
 
