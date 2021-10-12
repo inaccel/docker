@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/inaccel/docker/internal"
+	"github.com/inaccel/docker/pkg/grep"
 	"github.com/inaccel/docker/pkg/system"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -67,7 +68,7 @@ var (
 			cmd.Flag("all", true)
 			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_")))
 			cmd.Flag("force", true)
-			cmd.Std(nil, nil, os.Stderr)
+			cmd.Std(nil, grep.MustCompile("^$|Total reclaimed space").WriteCloser(os.Stdout, false, true), os.Stderr)
 
 			if err := cmd.Run(viper.GetBool("debug")); err != nil {
 				return err
@@ -100,6 +101,9 @@ var (
 				if err := cmd.Run(viper.GetBool("debug")); err != nil {
 					return err
 				}
+
+				fmt.Println("Deleted Volumes:")
+				fmt.Print(out)
 			}
 
 			return nil

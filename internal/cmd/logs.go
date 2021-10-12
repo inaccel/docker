@@ -73,7 +73,7 @@ var (
 					return err
 				}
 
-				stdout := pattern.WriteCloser(os.Stdout, !logs.GetBool("no-color"))
+				stdout := pattern.WriteCloser(os.Stdout, !logs.GetBool("no-color"), false)
 				defer stdout.Close()
 
 				cmd.Std(nil, stdout, os.Stderr)

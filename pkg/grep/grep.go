@@ -25,8 +25,9 @@ type Grep struct {
 type internal struct {
 	*Grep
 
-	writer io.Writer
-	color  bool
+	writer      io.Writer
+	color       bool
+	invertMatch bool
 
 	buffer []byte
 }
@@ -50,16 +51,17 @@ func MustCompile(pattern string) *Grep {
 	}
 }
 
-func (grep *Grep) WriteCloser(writer io.Writer, color bool) io.WriteCloser {
+func (grep *Grep) WriteCloser(writer io.Writer, color, invertMatch bool) io.WriteCloser {
 	return &internal{
-		Grep:   grep,
-		writer: writer,
-		color:  color,
+		Grep:        grep,
+		writer:      writer,
+		color:       color,
+		invertMatch: invertMatch,
 	}
 }
 
-func (grep *internal) flush(line []byte) error {
-	if grep.ere.Match(line) {
+func (grep *internal) flush(line []byte, ln bool) error {
+	if (grep.invertMatch && !grep.ere.Match(line)) || (!grep.invertMatch && grep.ere.Match(line)) {
 		if grep.color {
 			line = grep.ere.ReplaceAllFunc(line, func(match []byte) []byte {
 				return append(append(color, match...), reset...)
@@ -69,13 +71,18 @@ func (grep *internal) flush(line []byte) error {
 		if _, err := grep.writer.Write(line); err != nil {
 			return err
 		}
+		if ln {
+			if _, err := grep.writer.Write([]byte{'\n'}); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
 }
 
 func (grep *internal) Close() error {
-	return grep.flush(grep.buffer)
+	return grep.flush(grep.buffer, false)
 }
 
 func (grep *internal) Write(p []byte) (int, error) {
@@ -90,16 +97,16 @@ func (grep *internal) Write(p []byte) (int, error) {
 
 		var line []byte
 		if len(grep.buffer) > 0 {
-			line = append(grep.buffer, p[offset:offset+index+1]...)
+			line = append(grep.buffer, p[offset:offset+index]...)
 
 			grep.buffer = nil
 		} else {
-			line = p[offset : offset+index+1]
+			line = p[offset : offset+index]
 		}
 
 		offset += index + 1
 
-		if err := grep.flush(line); err != nil {
+		if err := grep.flush(line, true); err != nil {
 			return -1, err
 		}
 	}
