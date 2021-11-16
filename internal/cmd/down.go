@@ -64,8 +64,19 @@ var (
 			cmd = system.Command("docker")
 			cmd.Flag("host", internal.Host)
 			cmd.Flag("log-level", viper.GetString("log-level"))
-			cmd.Arg("system", "prune")
-			cmd.Flag("all", true)
+			cmd.Arg("container", "prune")
+			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_")))
+			cmd.Flag("force", true)
+			cmd.Std(nil, grep.MustCompile("^$|Total reclaimed space").WriteCloser(os.Stdout, false, true), os.Stderr)
+
+			if err := cmd.Run(viper.GetBool("debug")); err != nil {
+				return err
+			}
+
+			cmd = system.Command("docker")
+			cmd.Flag("host", internal.Host)
+			cmd.Flag("log-level", viper.GetString("log-level"))
+			cmd.Arg("network", "prune")
 			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_")))
 			cmd.Flag("force", true)
 			cmd.Std(nil, grep.MustCompile("^$|Total reclaimed space").WriteCloser(os.Stdout, false, true), os.Stderr)
