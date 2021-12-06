@@ -19,7 +19,7 @@ var (
 	// Down : docker inaccel down
 	Down = &cobra.Command{
 		Use:   "down [SERVICE]",
-		Short: "Stop and remove containers, networks and volumes",
+		Short: "Stop and remove containers and networks",
 		Args:  cobra.MaximumNArgs(1),
 		PreRunE: func(_ *cobra.Command, args []string) error {
 			var cmd *system.Cmd
@@ -85,39 +85,46 @@ var (
 				return err
 			}
 
-			cmd = system.Command("docker")
-			cmd.Flag("host", internal.Host)
-			cmd.Flag("log-level", viper.GetString("log-level"))
-			cmd.Arg("volume", "ls")
-			cmd.Flag("filter", "dangling=true")
-			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_")))
-			cmd.Flag("format", `{{ .Name }}`)
-			cmd.Std(nil, nil, os.Stderr)
-
-			out, err := cmd.Out(viper.GetBool("debug"))
-			if err != nil {
-				return err
-			}
-
-			names := strings.Fields(out)
-
-			if len(names) > 0 {
+			if down.GetBool("volumes") {
 				cmd = system.Command("docker")
 				cmd.Flag("host", internal.Host)
 				cmd.Flag("log-level", viper.GetString("log-level"))
-				cmd.Arg("volume", "rm")
-				cmd.Arg(names...)
+				cmd.Arg("volume", "ls")
+				cmd.Flag("filter", "dangling=true")
+				cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_")))
+				cmd.Flag("format", `{{ .Name }}`)
 				cmd.Std(nil, nil, os.Stderr)
 
-				if err := cmd.Run(viper.GetBool("debug")); err != nil {
+				out, err := cmd.Out(viper.GetBool("debug"))
+				if err != nil {
 					return err
 				}
 
-				fmt.Println("Deleted Volumes:")
-				fmt.Print(out)
+				names := strings.Fields(out)
+
+				if len(names) > 0 {
+					cmd = system.Command("docker")
+					cmd.Flag("host", internal.Host)
+					cmd.Flag("log-level", viper.GetString("log-level"))
+					cmd.Arg("volume", "rm")
+					cmd.Arg(names...)
+					cmd.Std(nil, nil, os.Stderr)
+
+					if err := cmd.Run(viper.GetBool("debug")); err != nil {
+						return err
+					}
+
+					fmt.Println("Deleted Volumes:")
+					fmt.Print(out)
+				}
 			}
 
 			return nil
 		},
 	}
 )
+
+func init() {
+	Down.Flags().BoolP("volumes", "v", false, "Remove volumes attached to containers")
+	down.BindPFlag("volumes", Down.Flags().Lookup("volumes"))
+}
