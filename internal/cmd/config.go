@@ -37,7 +37,7 @@ var (
 				cmd.Std(nil, os.Stdout, os.Stderr)
 
 				if err := cmd.Run(viper.GetBool("debug")); err != nil {
-					return err
+					return internal.ExitToStatus(err)
 				}
 			}
 
@@ -75,7 +75,7 @@ var (
 			cmd.Std(nil, os.Stdout, os.Stderr)
 
 			if err := cmd.Run(viper.GetBool("debug")); err != nil {
-				return err
+				return internal.ExitToStatus(err)
 			}
 
 			return nil

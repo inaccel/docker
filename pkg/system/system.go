@@ -8,8 +8,6 @@ import (
 	"reflect"
 	"strings"
 	"unicode"
-
-	"github.com/docker/cli/cli"
 )
 
 type Cmd struct {
@@ -71,13 +69,6 @@ func (cmd *Cmd) Err(debug bool) (string, error) {
 	}
 
 	err := command.Run()
-	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			err = cli.StatusError{
-				StatusCode: exitErr.ExitCode(),
-			}
-		}
-	}
 
 	return stderr.String(), err
 }
@@ -127,13 +118,6 @@ func (cmd *Cmd) Out(debug bool) (string, error) {
 	}
 
 	err := command.Run()
-	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			err = cli.StatusError{
-				StatusCode: exitErr.ExitCode(),
-			}
-		}
-	}
 
 	return stdout.String(), err
 }
@@ -151,16 +135,7 @@ func (cmd *Cmd) Run(debug bool) error {
 		cmd.debug()
 	}
 
-	err := command.Run()
-	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			err = cli.StatusError{
-				StatusCode: exitErr.ExitCode(),
-			}
-		}
-	}
-
-	return err
+	return command.Run()
 }
 
 func (cmd *Cmd) Std(in io.Reader, out, err io.Writer) {

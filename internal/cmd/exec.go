@@ -38,7 +38,7 @@ var (
 
 				out, err := cmd.Out(viper.GetBool("debug"))
 				if err != nil {
-					return err
+					return internal.ExitToStatus(err)
 				}
 
 				services := strings.Fields(out)
@@ -66,7 +66,7 @@ var (
 
 				out, err := cmd.Out(viper.GetBool("debug"))
 				if err != nil {
-					return err
+					return internal.ExitToStatus(err)
 				}
 
 				args = strings.Fields(out)
@@ -90,7 +90,7 @@ var (
 			cmd.Std(os.Stdin, os.Stdout, os.Stderr)
 
 			if err := cmd.Run(viper.GetBool("debug")); err != nil {
-				return err
+				return internal.ExitToStatus(err)
 			}
 
 			return nil

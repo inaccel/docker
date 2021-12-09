@@ -27,8 +27,8 @@ func main() {
 					return err
 				}
 
-				viper.BindPFlag("debug", cmd.Parent().Parent().Flags().Lookup("debug"))
-				viper.BindPFlag("log-level", cmd.Parent().Parent().Flags().Lookup("log-level"))
+				viper.BindPFlag("debug", cmd.Root().Flags().Lookup("debug"))
+				viper.BindPFlag("log-level", cmd.Root().Flags().Lookup("log-level"))
 
 				endpoint := cli.DockerEndpoint()
 				internal.Host, _ = url.Parse(endpoint.Host)

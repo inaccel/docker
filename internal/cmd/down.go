@@ -38,7 +38,7 @@ var (
 
 			out, err := cmd.Out(viper.GetBool("debug"))
 			if err != nil {
-				return err
+				return internal.ExitToStatus(err)
 			}
 
 			ids := strings.Fields(out)
@@ -52,7 +52,7 @@ var (
 				cmd.Std(nil, nil, os.Stderr)
 
 				if err := cmd.Run(viper.GetBool("debug")); err != nil {
-					return err
+					return internal.ExitToStatus(err)
 				}
 			}
 
@@ -70,7 +70,7 @@ var (
 			cmd.Std(nil, grep.MustCompile("^$|Total reclaimed space").WriteCloser(os.Stdout, false, true), os.Stderr)
 
 			if err := cmd.Run(viper.GetBool("debug")); err != nil {
-				return err
+				return internal.ExitToStatus(err)
 			}
 
 			cmd = system.Command("docker")
@@ -82,7 +82,7 @@ var (
 			cmd.Std(nil, grep.MustCompile("^$|Total reclaimed space").WriteCloser(os.Stdout, false, true), os.Stderr)
 
 			if err := cmd.Run(viper.GetBool("debug")); err != nil {
-				return err
+				return internal.ExitToStatus(err)
 			}
 
 			if down.GetBool("volumes") {
@@ -97,7 +97,7 @@ var (
 
 				out, err := cmd.Out(viper.GetBool("debug"))
 				if err != nil {
-					return err
+					return internal.ExitToStatus(err)
 				}
 
 				names := strings.Fields(out)
@@ -111,11 +111,11 @@ var (
 					cmd.Std(nil, nil, os.Stderr)
 
 					if err := cmd.Run(viper.GetBool("debug")); err != nil {
-						return err
+						return internal.ExitToStatus(err)
 					}
 
-					fmt.Println("Deleted Volumes:")
-					fmt.Print(out)
+					fmt.Fprintln(os.Stdout, "Deleted Volumes:")
+					fmt.Fprint(os.Stdout, out)
 				}
 			}
 
