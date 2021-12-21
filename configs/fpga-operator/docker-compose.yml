@@ -47,5 +47,26 @@ services:
     ports:
     - ${monitor_port:-0}:19999
     restart: always
+  tests_vadd-init:
+    command:
+    - bitstream
+    - install
+    - https://store.inaccel.com/artifactory/bitstreams/${tests_vadd_platform}/vector/1/1addition
+    image: inaccel/cli
+    profiles:
+    - tests
+    volumes:
+    - volume:/var/lib/inaccel
+  tests_vadd:
+    depends_on:
+      tests_vadd-init:
+        condition: service_completed_successfully
+    image: ${tests_vadd_image}:${tests_vadd_tag}
+    profiles:
+    - tests
+    volumes:
+    - volume:/var/lib/inaccel
 volumes:
   runtimes:
+  volume:
+    driver: inaccel
