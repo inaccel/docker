@@ -4,12 +4,17 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"os"
+	"strings"
 
+	"github.com/c-bata/go-prompt"
 	"github.com/docker/cli/cli-plugins/manager"
 	"github.com/docker/cli/cli-plugins/plugin"
 	"github.com/docker/cli/cli/command"
+	"github.com/google/shlex"
 	"github.com/inaccel/docker/internal"
 	"github.com/inaccel/docker/internal/cmd"
+	"github.com/inaccel/docker/pkg/system"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -21,6 +26,7 @@ func main() {
 		inaccel := &cobra.Command{
 			Use:     "inaccel",
 			Short:   "Simplifying FPGA management in Docker",
+			Args:    cobra.NoArgs,
 			Version: version,
 			PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 				if err := plugin.PersistentPreRunE(cmd, args); err != nil {
@@ -39,6 +45,111 @@ func main() {
 				default:
 					return net.UnknownNetworkError(internal.Host.Scheme)
 				}
+			},
+			Run: func(cmd *cobra.Command, _ []string) {
+				executor := func(input string) {
+					args, err := shlex.Split(input)
+					if err != nil {
+						fmt.Fprintln(os.Stderr, err)
+						return
+					}
+
+					if len(args) == 0 {
+						return
+					}
+
+					inaccel := system.Command(os.Args[0])
+					inaccel.Arg(os.Args[1:]...)
+					inaccel.Arg(args...)
+					inaccel.Env(os.Environ()...)
+					inaccel.Std(os.Stdin, os.Stdout, os.Stderr)
+
+					if err := inaccel.Run(false); err != nil {
+						fmt.Fprintln(os.Stderr, err)
+						return
+					}
+				}
+
+				completer := func(document prompt.Document) []prompt.Suggest {
+					if document.GetCharRelativeToCursor(1) > 0 && document.GetCharRelativeToCursor(1) != ' ' && document.GetCharRelativeToCursor(1) != '=' {
+						return nil
+					}
+					input := document.CurrentLineBeforeCursor()
+
+					args, err := shlex.Split(input)
+					if err != nil {
+						return nil
+					}
+
+					if len(args) == 0 || strings.HasSuffix(input, " ") {
+						args = append(args, "")
+					}
+
+					inaccel := system.Command(os.Args[0])
+					inaccel.Arg(cobra.ShellCompRequestCmd)
+					inaccel.Arg(os.Args[1:]...)
+					inaccel.Arg(args...)
+					inaccel.Env(os.Environ()...)
+
+					out, err := inaccel.Out(false)
+					if err != nil {
+						return nil
+					}
+
+					var suggestions []prompt.Suggest
+					for _, line := range strings.Split(out, "\n") {
+						if len(line) > 0 && !strings.HasPrefix(line, ":") {
+							suggestion := strings.SplitN(line, "\t", 2)
+							switch len(suggestion) {
+							case 1:
+								suggestions = append(suggestions, prompt.Suggest{
+									Text: suggestion[0],
+								})
+							case 2:
+								suggestions = append(suggestions, prompt.Suggest{
+									Text:        suggestion[0],
+									Description: suggestion[1],
+								})
+							}
+						}
+					}
+					return suggestions
+				}
+
+				fmt.Fprintln(os.Stdout, "Use Ctrl-D (i.e. EOF) to quit")
+
+				ps1, ok := os.LookupEnv("INACCEL_PS1")
+				if !ok {
+					args := make([]string, len(os.Args))
+					args[0] = cmd.Root().Name()
+					copy(args[1:], os.Args[1:])
+					ps1 = fmt.Sprintf("$ %s ", strings.Join(args, " "))
+				}
+
+				prompt.New(
+					executor,
+					completer,
+					prompt.OptionCompletionOnDown(),
+					prompt.OptionCompletionWordSeparator(" ="),
+					prompt.OptionDescriptionBGColor(prompt.DefaultColor),
+					prompt.OptionDescriptionTextColor(prompt.Blue),
+					prompt.OptionInputBGColor(prompt.DefaultColor),
+					prompt.OptionInputTextColor(prompt.DefaultColor),
+					prompt.OptionPrefix(ps1),
+					prompt.OptionPrefixBackgroundColor(prompt.DefaultColor),
+					prompt.OptionPrefixTextColor(prompt.DarkBlue),
+					prompt.OptionPreviewSuggestionBGColor(prompt.DefaultColor),
+					prompt.OptionPreviewSuggestionTextColor(prompt.Blue),
+					prompt.OptionScrollbarBGColor(prompt.DefaultColor),
+					prompt.OptionScrollbarThumbColor(prompt.DarkGray),
+					prompt.OptionSelectedDescriptionBGColor(prompt.DarkBlue),
+					prompt.OptionSelectedDescriptionTextColor(prompt.White),
+					prompt.OptionSelectedSuggestionBGColor(prompt.LightGray),
+					prompt.OptionSelectedSuggestionTextColor(prompt.Black),
+					prompt.OptionShowCompletionAtStart(),
+					prompt.OptionSuggestionBGColor(prompt.DefaultColor),
+					prompt.OptionSuggestionTextColor(prompt.DefaultColor),
+				).Run()
 			},
 		}
 

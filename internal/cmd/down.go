@@ -18,9 +18,32 @@ var (
 
 	// Down : docker inaccel down
 	Down = &cobra.Command{
-		Use:   "down [SERVICE]",
+		Use:   "down [OPTIONS] [SERVICE]",
 		Short: "Stop and remove containers and networks",
-		Args:  cobra.MaximumNArgs(1),
+		ValidArgsFunction: func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			var cmd *system.Cmd
+
+			cmd = system.Command("docker")
+			cmd.Flag("host", internal.Host)
+			cmd.Arg("ps")
+			cmd.Flag("filter", "label=com.docker.compose.oneoff=False")
+			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_")))
+			cmd.Flag("format", `{{ .Label "com.docker.compose.service" }}`)
+
+			out, err := cmd.Out(false)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveDefault
+			}
+
+			var completions []string
+			for _, completion := range strings.Fields(out) {
+				if strings.HasPrefix(completion, toComplete) {
+					completions = append(completions, completion)
+				}
+			}
+			return completions, cobra.ShellCompDirectiveNoFileComp
+		},
+		Args: cobra.MaximumNArgs(1),
 		PreRunE: func(_ *cobra.Command, args []string) error {
 			var cmd *system.Cmd
 

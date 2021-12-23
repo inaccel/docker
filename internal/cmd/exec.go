@@ -101,9 +101,60 @@ var (
 func init() {
 	Exec.Flags().Int("index", 1, "Index of the container if there are multiple instances of a service")
 	exec.BindPFlag("index", Exec.Flags().Lookup("index"))
+	Exec.RegisterFlagCompletionFunc("index", func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		var cmd *system.Cmd
+
+		if len(exec.GetString("service")) > 0 {
+			cmd = system.Command("docker")
+			cmd.Flag("host", internal.Host)
+			cmd.Arg("ps")
+			cmd.Flag("filter", "label=com.docker.compose.oneoff=False")
+			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_")))
+			cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.service=%s", exec.GetString("service")))
+			cmd.Flag("format", `{{ .Label "com.docker.compose.container-number" }}`)
+
+			out, err := cmd.Out(false)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveDefault
+			}
+
+			var completions []string
+			for _, completion := range strings.Fields(out) {
+				if strings.HasPrefix(completion, toComplete) {
+					completions = append(completions, completion)
+				}
+			}
+			return completions, cobra.ShellCompDirectiveNoFileComp
+		}
+
+		return nil, cobra.ShellCompDirectiveDefault
+	})
 
 	Exec.Flags().StringP("service", "s", "", "Service name")
 	exec.BindPFlag("service", Exec.Flags().Lookup("service"))
+	Exec.RegisterFlagCompletionFunc("service", func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		var cmd *system.Cmd
+
+		cmd = system.Command("docker")
+		cmd.Flag("host", internal.Host)
+		cmd.Arg("ps")
+		cmd.Flag("filter", "label=com.docker.compose.oneoff=False")
+		cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_")))
+		cmd.Flag("format", `{{ .Label "com.docker.compose.service" }}`)
+
+		out, err := cmd.Out(false)
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveDefault
+		}
+
+		var completions []string
+		for _, completion := range strings.Fields(out) {
+			if strings.HasPrefix(completion, toComplete) {
+				completions = append(completions, completion)
+			}
+		}
+		return completions, cobra.ShellCompDirectiveNoFileComp
+	})
 
 	Exec.Flags().StringSliceP("env", "e", []string{}, "Set environment variables")
 	exec.BindPFlag("env", Exec.Flags().Lookup("env"))
