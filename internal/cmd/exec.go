@@ -46,7 +46,31 @@ var (
 				if len(services) > 0 {
 					exec.Set("service", services[0])
 				} else {
-					return fmt.Errorf("Error: No service (%d) found for %s", exec.GetInt("index"), viper.GetString("project-name"))
+					cmd = system.Command("docker")
+					cmd.Flag("host", internal.Host)
+					cmd.Flag("log-level", viper.GetString("log-level"))
+					cmd.Arg("ps")
+					cmd.Flag("all", true)
+					cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.container-number=%d", exec.GetInt("index")))
+					cmd.Flag("filter", "label=com.docker.compose.oneoff=False")
+					cmd.Flag("filter", fmt.Sprintf("label=com.docker.compose.project=%s", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_")))
+					cmd.Flag("format", `{{ .Label "com.docker.compose.service" }}`)
+					cmd.Std(nil, nil, os.Stderr)
+
+					out, err := cmd.Out(viper.GetBool("debug"))
+					if err != nil {
+						return internal.ExitToStatus(err)
+					}
+
+					services := strings.Fields(out)
+
+					if len(services) == 0 {
+						return fmt.Errorf("Error: No service (%d) found for %s", exec.GetInt("index"), viper.GetString("project-name"))
+					} else if len(services) == 1 {
+						exec.Set("service", services[0])
+					} else {
+						return fmt.Errorf("Error: A service (%d) must be specified for %s, choose one of: [%s]", exec.GetInt("index"), viper.GetString("project-name"), strings.Join(services, " "))
+					}
 				}
 			}
 
