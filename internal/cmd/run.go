@@ -65,7 +65,7 @@ var (
 			}
 			cmd.Flag("interactive", true)
 			cmd.Flag("rm", true)
-			cmd.Flag("tty", true)
+			cmd.Flag("tty", !run.GetBool("no-tty"))
 			cmd.Flag("volume", fmt.Sprintf("%s:%s", internal.Host.Path, "/var/run/docker.sock"))
 			cmd.Arg(fmt.Sprintf("%s:%s", viper.GetString("project-name"), viper.GetString("tag")))
 			cmd.Flag("ansi", "always")
@@ -101,6 +101,9 @@ func init() {
 
 	Run.Flags().Bool("no-deps", false, "Don't start linked services")
 	run.BindPFlag("no-deps", Run.Flags().Lookup("no-deps"))
+
+	Run.Flags().BoolP("no-tty", "T", false, "Disable pseudo-TTY allocation")
+	run.BindPFlag("no-tty", Run.Flags().Lookup("no-tty"))
 
 	Run.Flags().StringSliceP("publish", "p", []string{}, "Publish a container's port(s) to the host")
 	run.BindPFlag("publish", Run.Flags().Lookup("publish"))

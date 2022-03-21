@@ -106,7 +106,7 @@ var (
 			cmd.Arg("exec")
 			cmd.Flag("env", exec.GetStringSlice("env"))
 			cmd.Flag("interactive", true)
-			cmd.Flag("tty", true)
+			cmd.Flag("tty", !exec.GetBool("no-tty"))
 			cmd.Flag("user", exec.GetString("user"))
 			cmd.Flag("workdir", exec.GetString("workdir"))
 			cmd.Arg(fmt.Sprintf("%s_%s_%d", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_"), exec.GetString("service"), exec.GetInt("index")))
@@ -123,6 +123,9 @@ var (
 )
 
 func init() {
+	Exec.Flags().StringSliceP("env", "e", []string{}, "Set environment variables")
+	exec.BindPFlag("env", Exec.Flags().Lookup("env"))
+
 	Exec.Flags().Int("index", 1, "Index of the container if there are multiple instances of a service")
 	exec.BindPFlag("index", Exec.Flags().Lookup("index"))
 	Exec.RegisterFlagCompletionFunc("index", func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -154,6 +157,9 @@ func init() {
 		return nil, cobra.ShellCompDirectiveDefault
 	})
 
+	Exec.Flags().BoolP("no-tty", "T", false, "Disable pseudo-TTY allocation")
+	exec.BindPFlag("no-tty", Exec.Flags().Lookup("no-tty"))
+
 	Exec.Flags().StringP("service", "s", "", "Service name")
 	exec.BindPFlag("service", Exec.Flags().Lookup("service"))
 	Exec.RegisterFlagCompletionFunc("service", func(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -179,9 +185,6 @@ func init() {
 		}
 		return completions, cobra.ShellCompDirectiveNoFileComp
 	})
-
-	Exec.Flags().StringSliceP("env", "e", []string{}, "Set environment variables")
-	exec.BindPFlag("env", Exec.Flags().Lookup("env"))
 
 	Exec.Flags().StringP("user", "u", "", "Username or UID (format: <name|uid>[:<group|gid>])")
 	exec.BindPFlag("user", Exec.Flags().Lookup("user"))
