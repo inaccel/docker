@@ -8,6 +8,7 @@ import (
 
 	"github.com/inaccel/docker/internal"
 	"github.com/inaccel/docker/pkg/system"
+	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -106,7 +107,7 @@ var (
 			cmd.Arg("exec")
 			cmd.Flag("env", exec.GetStringSlice("env"))
 			cmd.Flag("interactive", true)
-			cmd.Flag("tty", !exec.GetBool("no-tty"))
+			cmd.Flag("tty", !exec.GetBool("no-tty") && isatty.IsTerminal(os.Stdin.Fd()) && isatty.IsTerminal(os.Stdout.Fd()) && isatty.IsTerminal(os.Stderr.Fd()))
 			cmd.Flag("user", exec.GetString("user"))
 			cmd.Flag("workdir", exec.GetString("workdir"))
 			cmd.Arg(fmt.Sprintf("%s_%s_%d", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_"), exec.GetString("service"), exec.GetInt("index")))

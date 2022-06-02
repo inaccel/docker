@@ -9,6 +9,7 @@ import (
 	"github.com/inaccel/docker/internal"
 	"github.com/inaccel/docker/pkg/system"
 	"github.com/inaccel/docker/pkg/xdg"
+	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -65,10 +66,14 @@ var (
 			}
 			cmd.Flag("interactive", true)
 			cmd.Flag("rm", true)
-			cmd.Flag("tty", !run.GetBool("no-tty"))
+			cmd.Flag("tty", !run.GetBool("no-tty") && isatty.IsTerminal(os.Stdin.Fd()) && isatty.IsTerminal(os.Stdout.Fd()) && isatty.IsTerminal(os.Stderr.Fd()))
 			cmd.Flag("volume", fmt.Sprintf("%s:%s", internal.Host.Path, "/var/run/docker.sock"))
 			cmd.Arg(fmt.Sprintf("%s:%s", viper.GetString("project-name"), viper.GetString("tag")))
-			cmd.Flag("ansi", "always")
+			if !run.GetBool("no-tty") && isatty.IsTerminal(os.Stdin.Fd()) && isatty.IsTerminal(os.Stdout.Fd()) && isatty.IsTerminal(os.Stderr.Fd()) {
+				cmd.Flag("ansi", "always")
+			} else {
+				cmd.Flag("ansi", "never")
+			}
 			cmd.Flag("project-name", regexp.MustCompile("[^-0-9_a-z]").ReplaceAllString(strings.ToLower(viper.GetString("project-name")), "_"))
 			cmd.Arg("run")
 			cmd.Flag("entrypoint", run.GetString("entrypoint"))

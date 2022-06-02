@@ -8,6 +8,7 @@ import (
 	"github.com/inaccel/docker/internal"
 	"github.com/inaccel/docker/pkg/system"
 	"github.com/inaccel/docker/pkg/xdg"
+	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -66,7 +67,11 @@ var (
 			cmd.Flag("rm", true)
 			cmd.Flag("volume", fmt.Sprintf("%s:%s", internal.Host.Path, "/var/run/docker.sock"))
 			cmd.Arg(fmt.Sprintf("%s:%s", viper.GetString("project-name"), viper.GetString("tag")))
-			cmd.Flag("ansi", "always")
+			if isatty.IsTerminal(os.Stdout.Fd()) && isatty.IsTerminal(os.Stderr.Fd()) {
+				cmd.Flag("ansi", "always")
+			} else {
+				cmd.Flag("ansi", "never")
+			}
 			cmd.Arg("config")
 			cmd.Flag("profiles", config.GetBool("profiles"))
 			cmd.Flag("quiet", config.GetBool("quiet"))
