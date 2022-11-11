@@ -24,7 +24,7 @@ jobs:
         for VERSION in ${ALL_MODIFIED_FILES//,/ }; do
             CONFIG="${CONFIG:+${CONFIG}, }\"$(basename $(dirname ${VERSION}))\""
         done
-        echo "::set-output name=config::[${CONFIG}]"
+        echo "config=[${CONFIG}]" >> ${GITHUB_OUTPUT}
     outputs:
       matrix: ${{ steps.matrix.outputs.config }}
   pipeline:
