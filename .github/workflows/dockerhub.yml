@@ -8,12 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 2
     - name: Get changed VERSION files
       id: changed-files
-      uses: tj-actions/changed-files@v1.0.2
+      uses: tj-actions/changed-files@v34
       with:
         separator: ','
         files: configs/*/VERSION
@@ -36,19 +36,19 @@ jobs:
         config: ${{ fromJson(needs.configs.outputs.matrix) }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Read ${{ matrix.config }} VERSION file
       run: echo VERSION=$(cat configs/${{ matrix.config }}/VERSION) >> ${GITHUB_ENV}
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      uses: docker/setup-buildx-action@v2
     - name: Login to DockerHub
-      uses: docker/login-action@v1
+      uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Docker Metadata
       id: meta
-      uses: docker/metadata-action@v3
+      uses: docker/metadata-action@v4
       with:
         flavor: latest=true
         images: inaccel/${{ matrix.config }}
@@ -59,7 +59,7 @@ jobs:
           org.opencontainers.image.vendor=InAccel
         tags: ${{ env.VERSION }}
     - name: Build and push
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v3
       with:
         context: configs/${{ matrix.config }}
         labels: ${{ steps.meta.outputs.labels }}
